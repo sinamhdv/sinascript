@@ -4,7 +4,8 @@
 #include <stdio.h>
 
 static AstNode *parse_statement_list(Token *tokens) {
-	// AstNode *root = new_ast_node()
+	AstNode *root = AstNode_new(AST_STATEMENT_LIST, 0);
+	
 }
 
 void run_source(String *source) {

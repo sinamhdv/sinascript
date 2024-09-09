@@ -10,6 +10,7 @@ typedef enum TokenType {
 	TOKEN_NUMBER,		// number literal
 	TOKEN_KEYWORD,		// keyword
 	TOKEN_IDENTIFIER,	// identifier
+	TOKEN_EOF,			// end of file
 } TokenType;
 
 typedef struct Token {

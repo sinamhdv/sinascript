@@ -270,5 +270,9 @@ Token *tokenize_source(String *source) {
 		i += token->str.size;
 		i = skip_whitespace(source, i);
 	}
+	
+	Token *eof_token = new_token(0);
+	eof_token->type = TOKEN_EOF;
+	add_token(&tok_list, eof_token);
 	return tok_list;
 }
