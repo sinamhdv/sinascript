@@ -52,6 +52,7 @@ static Token *new_token(size_t str_size) {
 	token->type = -1;
 	token->str.size = str_size;
 	memset(token->str.data, 0, str_size);
+	return token;
 }
 
 static Token *get_single_char_token(String *source, size_t i) {
