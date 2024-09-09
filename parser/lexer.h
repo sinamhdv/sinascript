@@ -8,9 +8,9 @@ typedef enum TokenType {
 } TokenType;
 
 typedef struct Token {
-	TokenType type;
 	struct Token *next;
 	struct Token *prev;
+	TokenType type;
 	String str;
 } Token;
 

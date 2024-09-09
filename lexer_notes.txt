@@ -1,0 +1,14 @@
+[ ]
+( )
+{ }
++ - * /
+& | > < == = >= <= !
+;
+,
+ident
+string literal
+[0-9]+
+'while'
+'async'
+'else'
+'if'
