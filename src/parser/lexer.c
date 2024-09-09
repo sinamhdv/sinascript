@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 
-static void fatal_invalid_syntax(void) {
+void fatal_invalid_syntax(void) {
 #ifdef DEBUG
 	fprintf(stderr, "Syntax Error\n");
 #endif
