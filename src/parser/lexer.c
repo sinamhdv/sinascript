@@ -2,8 +2,12 @@
 #include "../utils/utils.h"
 #include <ctype.h>
 #include <string.h>
+#include <stdio.h>
 
 static void fatal_invalid_syntax(void) {
+#ifdef DEBUG
+	fprintf(stderr, "Syntax Error\n");
+#endif
 	exit(1);
 }
 

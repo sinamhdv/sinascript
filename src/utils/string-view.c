@@ -1,6 +1,6 @@
-#include "string.h"
-#include <string.h>
+#include "string-view.h"
 #include "utils.h"
+#include <string.h>
 
 String *String_new(size_t size) {
 	String *str = checked_malloc(sizeof(String) + size);

@@ -1,9 +1,10 @@
 CC=gcc
-CFLAGS=-Wall -g
+CFLAGS=-Wall -g -DDEBUG
 OBJDIR=build
+SRCDIR=src
 
-SRCS := $(shell find . -type f -name '*.c')
-OBJS := $(addprefix $(OBJDIR)/,$(SRCS:%.c=%.o))
+SRCS := $(shell find $(SRCDIR) -type f -name '*.c')
+OBJS := $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRCS))
 TARGET_BIN = lang
 
 PACKAGES = utils parser
@@ -14,7 +15,7 @@ all: $(TARGET_BIN)
 $(TARGET_BIN): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $@
 
-$(OBJDIR)/%.o: %.c
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -I$(dir $<) -c $< -o $@
 
 clean:

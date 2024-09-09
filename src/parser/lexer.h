@@ -1,4 +1,4 @@
-#include "../utils/string.h"
+#include "../utils/string-view.h"
 
 #ifndef MYHEADER_LEXER_H
 #define MYHEADER_LEXER_H
