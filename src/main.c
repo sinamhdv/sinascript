@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "utils/string-view.h"
+#include "types/string-view.h"
 #include "parser/parser.h"
 
 int main(int argc, char **argv) {
