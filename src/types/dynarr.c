@@ -15,7 +15,9 @@ void DynArr_resize(DynArr *dynarr, size_t new_capacity) {
 
 void DynArr_push(DynArr *dynarr, void *value) {
 	if (dynarr->size == dynarr->capacity) {
-		DynArr_resize(dynarr, 2 * dynarr->capacity);
+		size_t new_capacity = 2 * dynarr->capacity;
+		if (new_capacity == 0) new_capacity = 1;
+		DynArr_resize(dynarr, new_capacity);
 	}
 	dynarr->arr[dynarr->size++] = value;
 }
