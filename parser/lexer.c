@@ -72,8 +72,100 @@ static Token *get_comparison_token(String *source, size_t i) {
 	return token;
 }
 
+/*
 static Token *get_string_literal_token(String *source, size_t i) {
+	// TODO: put CTF vuln here? wrong string literal final length calculation => heap overflow
 
+	// calculate size
+	size_t str_size = 0;
+	size_t start_i = ++i;
+	while (i < source->size) {
+		char c = source->data[i];
+		if (c == '\\') {
+			if (i + 1 >= source->size) fatal_invalid_syntax();
+			char op = source->data[i + 1];
+			i += (op == 'x' ? 4 : 2);
+			str_size++;
+		} else if (c == '"') {
+			break;
+		} else {
+			i++;
+			str_size++;
+		}
+	}
+
+	Token *token = new_token(str_size);
+	token->type = TOKEN_STRING;
+	char *copy_ptr = token->str.data;
+	i = start_i;
+	while (i < source->size) {
+		char c = source->data[i];
+		if (c == '\\') {
+			if (i + 1 >= source->size) fatal_invalid_syntax();
+			char op = source->data[i + 1];
+			switch (op) {
+				case '0':
+					*copy_ptr++ = '\0';
+					break;
+				case 'a':
+					*copy_ptr++ = '\a';
+					break;
+				case 'b':
+					*copy_ptr++ = '\b';
+					break;
+				case 't':
+					*copy_ptr++ = '\t';
+					break;
+				case 'n':
+					*copy_ptr++ = '\n';
+					break;
+				case 'v':
+					*copy_ptr++ = '\v';
+					break;
+				case 'f':
+					*copy_ptr++ = '\f';
+					break;
+				case 'r':
+					*copy_ptr++ = '\r';
+					break;
+				case '\\':
+					*copy_ptr++ = '\\';
+					break;
+				case '"':
+					*copy_ptr++ = '"';
+					break;
+				case 'x':
+					*copy_ptr++ = parse_hex_escape(source->data + i + 2);
+					break;
+				default:
+					fatal_invalid_syntax();
+			}
+			i += (op == 'x' ? 4 : 2);
+		} else if (c == '"') {
+			break;
+		}
+	}
+}
+*/
+
+static Token *get_string_literal_token(String *source, size_t i) {
+	size_t start_i = i;
+	while (i < source->size) {
+		if (source->data[i] == '\\') {
+			if (i + 1 >= source->size) fatal_invalid_syntax();
+			i += 2;
+		} else if (source->data[i] == '"') {
+			break;
+		} else {
+			i++;
+		}
+	}
+	if (i >= source->size || source->data[i] != '"') fatal_invalid_syntax();
+	i++;
+	Token *token = new_token(i - start_i);
+	token->type = TOKEN_STRING;
+	memcpy(token->str.data, source->data + start_i, i - start_i);
+	return token;
 }
 
 static Token *get_num_literal_token(String *source, size_t i) {
