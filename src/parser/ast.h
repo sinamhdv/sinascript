@@ -38,6 +38,9 @@ typedef struct AstNode {
 	};
 } AstNode;
 
+AstNode *AstNode_new(AstNodeType type, size_t extra_size);
+int AstNodeType_can_have_subs(AstNodeType type);
+
 // returns -1 if the node cannot have subs, 0 on success
 int AstNode_addsub(AstNode *node, AstNode *sub);
 
