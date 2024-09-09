@@ -5,5 +5,6 @@
 #define MYHEADER_UTILS_H
 
 void *checked_malloc(size_t size);
+void *checked_realloc(void *ptr, size_t size);
 
 #endif

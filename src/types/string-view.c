@@ -1,5 +1,5 @@
 #include "string-view.h"
-#include "utils.h"
+#include "../utils/utils.h"
 #include <string.h>
 
 String *String_new(size_t size) {

@@ -9,3 +9,12 @@ void *checked_malloc(size_t size) {
 	}
 	return ptr;
 }
+
+void *checked_realloc(void *ptr, size_t size) {
+	ptr = realloc(ptr, size);
+	if (ptr == NULL) {
+		perror("realloc");
+		exit(1);
+	}
+	return ptr;
+}
