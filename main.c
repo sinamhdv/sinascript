@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "utils/string.h"
+#include "parser/parser.h"
 
 int main(int argc, char **argv)
 {
@@ -22,7 +23,7 @@ int main(int argc, char **argv)
 	if (fread(source->data, 1, file_size, fp) != file_size) return 1;
 	fclose(fp);
 
-	// run_source(source);
+	run_source(source);
 
 	String_free(source);
 	return 0;

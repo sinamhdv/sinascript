@@ -1,0 +1,39 @@
+var_def: var_type ident '=' expr
+var_assign: ident '=' expr
+var_type: 'num' | 'str' | TODO
+ident: /[A-Za-z_][A-Za-z0-9_]*/
+expr:
+	term
+	term '+'/'-' expr
+	'-' term
+
+term:
+	'(' term ')'
+	value '*'/'/' term
+
+value:
+	function_call
+	num_literal
+	str_literal
+	ident
+
+num_literal: '-' [0-9]+ | [0-9]+
+str_literal: TODO
+function_call: ident '(' arg_list ')'
+arg_list: <empty> | expr | expr ',' arg_list
+
+function_def: 'func' ident '(' ident_list ')' block
+ident_list: <empty> | ident | ident ',' ident_list
+
+block: '{' line_list '}'
+line_list: <empty> | line ';' line_list
+line:
+	var_decl
+	var_assign
+	expr
+
+
+
+
+
+
