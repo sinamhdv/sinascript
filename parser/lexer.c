@@ -1,5 +1,6 @@
 #include "lexer.h"
 #include <ctype.h>
+#include <string.h>
 
 static size_t skip_whitespace(String *source, size_t i) {
 	while (i < source->size && isspace(source->data[i]))
@@ -23,7 +24,17 @@ static Token *add_token(Token **tok_list, Token *token) {
 }
 
 static int is_keyword(String *source, size_t i) {
-	
+	char *keywords[] = {"if", "else", "while", "async"};
+	size_t keywords_size = sizeof(keywords) / sizeof(char *);
+	for (size_t i = 0; i < keywords_size; i++) {
+		size_t size = strlen(keywords[i]);
+		if (i + size <= source->size) {
+			if (memcmp(source->data + i, keywords[i], size) == 0) {
+				return 1;
+			}
+		}
+	}
+	return 0;
 }
 
 static Token *get_single_char_token(String *source, size_t i) {
