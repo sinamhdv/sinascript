@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include "../utils/utils.h"
 #include <ctype.h>
 #include <string.h>
 
@@ -37,12 +38,23 @@ static int is_keyword(String *source, size_t i) {
 	return 0;
 }
 
-static Token *get_single_char_token(String *source, size_t i) {
+static Token *new_token(size_t str_size) {
+	Token *token = checked_malloc(sizeof(Token) + str_size);
+	token->next = token->prev = NULL;
+	token->type = -1;
+	token->str.size = str_size;
+	memset(token->str.data, 0, str_size);
+}
 
+static Token *get_single_char_token(String *source, size_t i) {
+	Token *token = new_token(1);
+	token->type = TOKEN_SINGLE;
+	token->str.data[0] = source->data[i];
+	return token;
 }
 
 static Token *get_comparison_token(String *source, size_t i) {
-
+	
 }
 
 static Token *get_string_literal_token(String *source, size_t i) {

@@ -1,10 +1,10 @@
 #include "string.h"
 #include <string.h>
+#include "utils.h"
 
 String *String_new(size_t size) {
-	String *str = malloc(sizeof(String) + size);
-	if (str == NULL) return NULL;
-	str->size = 0;
+	String *str = checked_malloc(sizeof(String) + size);
+	str->size = size;
 	memset(str->data, 0, size);
 	return str;
 }

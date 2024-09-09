@@ -4,7 +4,12 @@
 #define MYHEADER_LEXER_H
 
 typedef enum TokenType {
-	TOKEN_NUM = 0,	// numeric literal
+	TOKEN_SINGLE = 0,	// single char token
+	TOKEN_COMPARE,		// > < = >= <= ==
+	TOKEN_STRING,		// string literal
+	TOKEN_NUMBER,		// number literal
+	TOKEN_KEYWORD,		// keyword
+	TOKEN_IDENTIFIER,	// identifier
 } TokenType;
 
 typedef struct Token {
