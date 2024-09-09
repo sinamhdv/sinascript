@@ -35,6 +35,10 @@ static int is_keyword(String *source, size_t i) {
 		size_t size = strlen(keywords[i]);
 		if (i + size <= source->size) {
 			if (memcmp(source->data + i, keywords[i], size) == 0) {
+				if (i + size >= source->size) return 1;
+				char after_keyword = source->data[i + size];
+				if (isalnum(after_keyword) || after_keyword == '_')
+					return 0;
 				return 1;
 			}
 		}
@@ -85,7 +89,7 @@ static Token *get_num_literal_token(String *source, size_t i) {
 }
 
 static Token *get_keyword_token(String *source, size_t i) {
-	
+
 }
 
 static Token *get_identifier_token(String *source, size_t i) {
