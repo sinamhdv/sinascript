@@ -250,8 +250,23 @@ Token *tokenize_source(String *source) {
 				break;
 			}
 		}
-		// fwrite(token->str.data, 1, token->str.size, stdout);
-		// putchar('\n');
+
+#ifdef DEBUG
+		switch (token->type) {
+			case TOKEN_SINGLE: printf("[SINGLE] "); break;
+			case TOKEN_COMPARE: printf("[COMPARE] "); break;
+			case TOKEN_STRING: printf("[STRING] "); break;
+			case TOKEN_NUMBER: printf("[NUMBER] "); break;
+			case TOKEN_KEYWORD: printf("[KEYWORD] "); break;
+			case TOKEN_IDENTIFIER: printf("[IDENTIFIER] "); break;
+			default: printf("[TOKEN_#%d] ", token->type); break;
+		}
+		putchar('\'');
+		fwrite(token->str.data, 1, token->str.size, stdout);
+		putchar('\'');
+		putchar('\n');
+#endif
+
 		i += token->str.size;
 		i = skip_whitespace(source, i);
 	}

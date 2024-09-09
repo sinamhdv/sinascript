@@ -1,0 +1,20 @@
+SL = statement_list
+SL: statement children[*]
+statement:
+	if: expr cond, SL then, [SL else]
+	while: expr cond, SL block
+	async: SL block
+	assignment: ident/index lvalue, expr rvalue
+
+expr:
+	bin_op: char op[2], expr lval, expr rval
+	unary_op: char op, expr val
+	index: ident arr, expr idx
+	function_call: ident func, expr_list args
+	array: expr_list members
+	ident: 'ident'
+	number: 'int'
+	string: 'string'
+
+expr_list: expr vals[*]
+
