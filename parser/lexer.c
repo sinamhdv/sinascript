@@ -54,7 +54,13 @@ static Token *get_single_char_token(String *source, size_t i) {
 }
 
 static Token *get_comparison_token(String *source, size_t i) {
-	
+	size_t data_size = (i + 1 < source->size && source->data[i + 1] == '=') ? 2 : 1;
+	Token *token = new_token(data_size);
+	token->type = TOKEN_COMPARE;
+	token->str.data[0] = source->data[i];
+	if (data_size > 1)
+		token->str.data[1] = source->data[i + 1];
+	return token;
 }
 
 static Token *get_string_literal_token(String *source, size_t i) {
