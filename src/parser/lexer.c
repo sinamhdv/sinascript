@@ -154,6 +154,7 @@ static Token *get_string_literal_token(String *source, size_t i) {
 
 static Token *get_string_literal_token(String *source, size_t i) {
 	size_t start_i = i;
+	i++;
 	while (i < source->size) {
 		if (source->data[i] == '\\') {
 			if (i + 1 >= source->size) fatal_invalid_syntax();
@@ -249,6 +250,8 @@ Token *tokenize_source(String *source) {
 				break;
 			}
 		}
+		// fwrite(token->str.data, 1, token->str.size, stdout);
+		// putchar('\n');
 		i += token->str.size;
 		i = skip_whitespace(source, i);
 	}

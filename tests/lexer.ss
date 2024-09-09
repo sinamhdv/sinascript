@@ -1,7 +1,7 @@
 x = 12;
 x = a + 10;
 y = ((a + x + 5) * 17 - 3 / 4) * k;
-z = builtin_func(12, 32);
+z = builtinFunc(12, 32);
 print(x)
 async {
 	while (1) {
@@ -11,3 +11,5 @@ async {
 p = [1, 2, ["haha", x]]
 p[0] = 8
 l = p[0] + p[1]
+while2 = 5;
+ifabcd = 7;
