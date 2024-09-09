@@ -38,7 +38,7 @@ index_expr: ident '[' expr ']'
 function_call: ident '(' expr_list ')'
 expr_list: <empty> | expr | expr ',' expr_list
 
-ident: [A-Za-z_][A-Za-z_0-9]*
+ident: [A-Za-z][A-Za-z0-9]*
 
 literal: num_literal | str_literal | arr_literal
 num_literal = '-' [0-9]+ | [0-9]+

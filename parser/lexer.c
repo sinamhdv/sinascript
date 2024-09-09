@@ -28,18 +28,18 @@ static Token *add_token(Token **tok_list, Token *token) {
 	return token;
 }
 
-static int is_keyword(String *source, size_t i) {
+static int get_keyword_size_at(String *source, size_t i) {
 	char *keywords[] = {"if", "else", "while", "async"};
 	size_t keywords_size = sizeof(keywords) / sizeof(char *);
 	for (size_t i = 0; i < keywords_size; i++) {
 		size_t size = strlen(keywords[i]);
 		if (i + size <= source->size) {
 			if (memcmp(source->data + i, keywords[i], size) == 0) {
-				if (i + size >= source->size) return 1;
+				if (i + size >= source->size) return size;
 				char after_keyword = source->data[i + size];
-				if (isalnum(after_keyword) || after_keyword == '_')
+				if (isalnum(after_keyword))
 					return 0;
-				return 1;
+				return size;
 			}
 		}
 	}
@@ -77,9 +77,9 @@ static Token *get_string_literal_token(String *source, size_t i) {
 
 static Token *get_num_literal_token(String *source, size_t i) {
 	size_t digits_cnt = 0;
-	while (isdigit(source->data[i + digits_cnt]))
+	while (i + digits_cnt < source->size && isdigit(source->data[i + digits_cnt]))
 		digits_cnt++;
-	if (i + digits_cnt < source->size && (isalpha(source->data[i + digits_cnt]) || source->data[i + digits_cnt] == '_')) {
+	if (i + digits_cnt < source->size && isalpha(source->data[i + digits_cnt])) {
 		fatal_invalid_syntax();
 	}
 	Token *token = new_token(digits_cnt);
@@ -89,11 +89,22 @@ static Token *get_num_literal_token(String *source, size_t i) {
 }
 
 static Token *get_keyword_token(String *source, size_t i) {
-
+	size_t size = get_keyword_size_at(source, i);
+	Token *token = new_token(size);
+	token->type = TOKEN_KEYWORD;
+	memcpy(token->str.data, source->data + i, size);
+	return token;
 }
 
 static Token *get_identifier_token(String *source, size_t i) {
-
+	size_t ident_size = 0;
+	while (i + ident_size < source->size && isalnum(source->data[i + ident_size]))
+		ident_size++;
+	if (ident_size == 0) fatal_invalid_syntax();
+	Token *token = new_token(ident_size);
+	token->type = TOKEN_IDENTIFIER;
+	memcpy(token->str.data, source->data + i, ident_size);
+	return token;
 }
 
 Token *tokenize_source(String *source) {
@@ -133,7 +144,7 @@ Token *tokenize_source(String *source) {
 			default: {
 				if (isdigit(c)) {
 					token = add_token(&tok_list, get_num_literal_token(source, i));
-				} else if (is_keyword(source, i)) {
+				} else if (get_keyword_size_at(source, i) > 0) {
 					token = add_token(&tok_list, get_keyword_token(source, i));
 				} else {
 					token = add_token(&tok_list, get_identifier_token(source, i));
