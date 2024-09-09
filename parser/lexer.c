@@ -3,6 +3,10 @@
 #include <ctype.h>
 #include <string.h>
 
+static void fatal_invalid_syntax(void) {
+	exit(1);
+}
+
 static size_t skip_whitespace(String *source, size_t i) {
 	while (i < source->size && isspace(source->data[i]))
 		i++;
@@ -68,11 +72,20 @@ static Token *get_string_literal_token(String *source, size_t i) {
 }
 
 static Token *get_num_literal_token(String *source, size_t i) {
-
+	size_t digits_cnt = 0;
+	while (isdigit(source->data[i + digits_cnt]))
+		digits_cnt++;
+	if (i + digits_cnt < source->size && (isalpha(source->data[i + digits_cnt]) || source->data[i + digits_cnt] == '_')) {
+		fatal_invalid_syntax();
+	}
+	Token *token = new_token(digits_cnt);
+	token->type = TOKEN_NUMBER;
+	memcpy(token->str.data, source->data + i, digits_cnt);
+	return token;
 }
 
 static Token *get_keyword_token(String *source, size_t i) {
-
+	
 }
 
 static Token *get_identifier_token(String *source, size_t i) {
