@@ -38,7 +38,9 @@ typedef struct AstNode {
 	};
 } AstNode;
 
-AstNode *AstNode_new(AstNodeType type, size_t extra_size);
+// size will be the initial size of DynArr at first or for
+// nodes that can't have subs, it'll be the length of the string stored in them.
+AstNode *AstNode_new(AstNodeType type, size_t size);
 
 // returns -1 if the node cannot have subs, 0 on success
 int AstNode_addsub(AstNode *node, AstNode *sub);

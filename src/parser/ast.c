@@ -1,13 +1,13 @@
 #include "ast.h"
 #include "../utils/utils.h"
 
-AstNode *AstNode_new(AstNodeType type, size_t extra_size) {
+AstNode *AstNode_new(AstNodeType type, size_t size) {
 	AstNode *node;
 	if (ASTNODETYPE_CAN_HAVE_SUBS(type)) {
 		node = checked_malloc(sizeof(AstNode));
-		DynArr_init(&node->subs, 0);
+		DynArr_init(&node->subs, size);
 	} else {
-		node = checked_malloc(sizeof(AstNode) + extra_size);
+		node = checked_malloc(sizeof(AstNode) + size);
 	}
 	node->type = type;
 	return node;
