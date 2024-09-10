@@ -23,6 +23,6 @@ typedef struct Token {
 Token *add_token_to_list(Token **tok_list, Token *token);
 Token *Token_new(size_t str_size);
 
-#define TOKEN_IS_CLOSING_CURLY_BRACE(t) ((t)->type == TOKEN_SINGLE && (t)->str.data[0] == '}')
+#define TOKEN_IS_SINGLE_CHAR(t, c) ((t)->type == TOKEN_SINGLE && (t)->str.data[0] == (c))
 
 #endif

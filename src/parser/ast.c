@@ -5,6 +5,7 @@ AstNode *AstNode_new(AstNodeType type, size_t size) {
 	AstNode *node;
 	if (ASTNODETYPE_CAN_HAVE_SUBS(type)) {
 		node = checked_malloc(sizeof(AstNode));
+		node->op[0] = node->op[1] = 0;
 		DynArr_init(&node->subs, size);
 	} else {
 		node = checked_malloc(sizeof(AstNode) + size);
