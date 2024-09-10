@@ -35,19 +35,12 @@ static int get_keyword_size_at(String *source, size_t i) {
 	return 0;
 }
 
-static Token *get_single_char_token(String *source, size_t i) {
-	Token *token = Token_new(1);
-	token->type = TOKEN_SINGLE;
+static Token *get_operator_token(String *source, size_t i) {
+	size_t op_size = (i + 1 < source->size && source->data[i + 1] == '=') ? 2 : 1;
+	Token *token = Token_new(op_size);
+	token->type = TOKEN_OPERATOR;
 	token->str.data[0] = source->data[i];
-	return token;
-}
-
-static Token *get_comparison_token(String *source, size_t i) {
-	size_t data_size = (i + 1 < source->size && source->data[i + 1] == '=') ? 2 : 1;
-	Token *token = Token_new(data_size);
-	token->type = TOKEN_COMPARE;
-	token->str.data[0] = source->data[i];
-	if (data_size > 1)
+	if (op_size > 1)
 		token->str.data[1] = source->data[i + 1];
 	return token;
 }
@@ -205,12 +198,10 @@ Token *tokenize_source(String *source) {
 			case '!':
 			case ';':
 			case ',':
-				token = add_token_to_list(&tok_list, get_single_char_token(source, i));
-				break;
 			case '<':
 			case '>':
 			case '=':
-				token = add_token_to_list(&tok_list, get_comparison_token(source, i));
+				token = add_token_to_list(&tok_list, get_operator_token(source, i));
 				break;
 			case '"':
 				token = add_token_to_list(&tok_list, get_string_literal_token(source, i));
@@ -229,8 +220,7 @@ Token *tokenize_source(String *source) {
 
 #ifdef DEBUG
 		switch (token->type) {
-			case TOKEN_SINGLE: printf("[SINGLE] "); break;
-			case TOKEN_COMPARE: printf("[COMPARE] "); break;
+			case TOKEN_OPERATOR: printf("[OPERATOR] "); break;
 			case TOKEN_STRING: printf("[STRING] "); break;
 			case TOKEN_NUMBER: printf("[NUMBER] "); break;
 			case TOKEN_KEYWORD: printf("[KEYWORD] "); break;

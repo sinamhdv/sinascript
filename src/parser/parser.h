@@ -11,16 +11,18 @@ AstNode *parse_statement_list(Token **start_tok, int is_block);
 
 #define IS_PAST_LAST_BIN_OP_LEVEL(x) ((x) > 4)
 
-#define TOKEN_IS_BIN_OP_LEVEL(t, l) (((l) == 0 && String_cmparr(&(t)->str, "|") == 0) \
-	|| (((l) == 1) && String_cmparr(&(t)->str, "&") == 0) \
-	|| (((l) == 2) && (String_cmparr(&(t)->str, ">") == 0 \
-		|| String_cmparr(&(t)->str, "<") == 0 \
-		|| String_cmparr(&(t)->str, ">=") == 0 \
-		|| String_cmparr(&(t)->str, "<=") == 0 \
-		|| String_cmparr(&(t)->str, "==") == 0)) \
-	|| (((l) == 3) && (String_cmparr(&(t)->str, "+") == 0 \
-		|| String_cmparr(&(t)->str, "-") == 0)) \
-	|| (((l) == 4) && (String_cmparr(&(t)->str, "*") == 0 \
-		|| String_cmparr(&(t)->str, "/") == 0)))
+// defines operator precedence
+#define TOKEN_IS_BIN_OP_LEVEL(t, l) (((l) == 0 && TOKEN_IS_OPERATOR(t, "|")) \
+	|| (((l) == 1) && TOKEN_IS_OPERATOR(t, "&")) \
+	|| (((l) == 2) && (TOKEN_IS_OPERATOR(t, ">") \
+		|| TOKEN_IS_OPERATOR(t, "<") \
+		|| TOKEN_IS_OPERATOR(t, ">=") \
+		|| TOKEN_IS_OPERATOR(t, "<=") \
+		|| TOKEN_IS_OPERATOR(t, "==") \
+		|| TOKEN_IS_OPERATOR(t, "!="))) \
+	|| (((l) == 3) && (TOKEN_IS_OPERATOR(t, "+") \
+		|| TOKEN_IS_OPERATOR(t, "-"))) \
+	|| (((l) == 4) && (TOKEN_IS_OPERATOR(t, "*") \
+		|| TOKEN_IS_OPERATOR(t, "/"))))
 
 #endif

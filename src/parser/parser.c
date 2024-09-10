@@ -4,18 +4,20 @@
 #include "ast.h"
 #include <stdio.h>
 
-static void parser_skip_single_char(Token **start_tok, char c) {
-	Token *token = *start_tok;
-	if (token->type != TOKEN_SINGLE || token->str.data[0] != c) fatal_invalid_syntax();
-	*start_tok = token->next;
+static void parser_skip_operator(Token **start_tok, char *op) {
+	if (!TOKEN_IS_OPERATOR(*start_tok, op)) fatal_invalid_syntax();
+	*start_tok = (*start_tok)->next;
 }
 
 static AstNode *parse_primary_expression(Token **start_tok) {
-	
+	// switch ((*start_tok)->type) {
+	// 	case TOKEN_IDENTIFIER:
+	// 		break;
+	// }
 }
 
 static AstNode *parse_unary_op_expression(Token **start_tok) {
-	if (!TOKEN_IS_SINGLE_CHAR(*start_tok, '-') && !TOKEN_IS_SINGLE_CHAR(*start_tok, '!'))
+	if (!TOKEN_IS_OPERATOR(*start_tok, "-") && !TOKEN_IS_OPERATOR(*start_tok, "!"))
 		return parse_primary_expression(start_tok);
 	AstNode *root = AstNode_new(AST_UNARY_OP, 1);
 	root->op[0] = (*start_tok)->str.data[0];
@@ -48,21 +50,21 @@ AstNode *parse_expression(Token **start_tok) {
 
 static AstNode *parse_if_statement(Token **start_tok) {
 	*start_tok = (*start_tok)->next;
-	parser_skip_single_char(start_tok, '(');
+	parser_skip_operator(start_tok, "(");
 	AstNode *root = AstNode_new(AST_IF, 2);
 	AstNode_addsub(root, parse_expression(start_tok));
-	parser_skip_single_char(start_tok, ')');
-	parser_skip_single_char(start_tok, '{');
+	parser_skip_operator(start_tok, ")");
+	parser_skip_operator(start_tok, "{");
 	AstNode_addsub(root, parse_statement_list(start_tok, 1));
-	parser_skip_single_char(start_tok, '}');
+	parser_skip_operator(start_tok, "}");
 	
 	// parse optional else block
 	if ((*start_tok)->type == TOKEN_KEYWORD && String_cmparr(&(*start_tok)->str, "else")) {
 		*start_tok = (*start_tok)->next;
-		parser_skip_single_char(start_tok, '{');
+		parser_skip_operator(start_tok, "{");
 		DynArr_resize(&root->subs, 3);
 		AstNode_addsub(root, parse_statement_list(start_tok, 1));
-		parser_skip_single_char(start_tok, '}');
+		parser_skip_operator(start_tok, "}");
 	}
 	
 	return root;
@@ -70,22 +72,22 @@ static AstNode *parse_if_statement(Token **start_tok) {
 
 static AstNode *parse_while_statement(Token **start_tok) {
 	*start_tok = (*start_tok)->next;
-	parser_skip_single_char(start_tok, '(');
+	parser_skip_operator(start_tok, "(");
 	AstNode *root = AstNode_new(AST_WHILE, 2);
 	AstNode_addsub(root, parse_expression(start_tok));
-	parser_skip_single_char(start_tok, ')');
-	parser_skip_single_char(start_tok, '{');
+	parser_skip_operator(start_tok, ")");
+	parser_skip_operator(start_tok, "{");
 	AstNode_addsub(root, parse_statement_list(start_tok, 1));
-	parser_skip_single_char(start_tok, '}');
+	parser_skip_operator(start_tok, "}");
 	return root;
 }
 
 static AstNode *parse_async_statement(Token **start_tok) {
 	*start_tok = (*start_tok)->next;
 	AstNode *root = AstNode_new(AST_ASYNC, 1);
-	parser_skip_single_char(start_tok, '{');
+	parser_skip_operator(start_tok, "{");
 	AstNode_addsub(root, parse_statement_list(start_tok, 1));
-	parser_skip_single_char(start_tok, '}');
+	parser_skip_operator(start_tok, "}");
 	return root;
 }
 
@@ -104,19 +106,18 @@ static AstNode *parse_statement(Token **start_tok) {
 	} else {	// expression_statement | assignment_statement
 		AstNode *expr = parse_expression(start_tok);
 		token = *start_tok;
-		if (token->type != TOKEN_SINGLE) fatal_invalid_syntax();
-		if (String_cmparr(&token->str, "=") == 0) {	// assignment_statement
+		if (TOKEN_IS_OPERATOR(token, "=")) {	// assignment_statement
 			if (!ASTNODETYPE_IS_ASSIGNMENT_LVALUE(expr->type))
 				fatal_invalid_syntax();
-			parser_skip_single_char(start_tok, '=');
+			parser_skip_operator(start_tok, "=");
 			AstNode *rvalue = parse_expression(start_tok);
-			parser_skip_single_char(start_tok, ';');
+			parser_skip_operator(start_tok, ";");
 			AstNode *root = AstNode_new(AST_ASSIGNMENT, 2);
 			AstNode_addsub(root, expr);
 			AstNode_addsub(root, rvalue);
 			return root;
-		} else {	// expression_statement
-			parser_skip_single_char(start_tok, ';');
+		} else {	// expression_statement or invalid syntax
+			parser_skip_operator(start_tok, ";");
 			return expr;
 		}
 	}
@@ -125,7 +126,7 @@ static AstNode *parse_statement(Token **start_tok) {
 AstNode *parse_statement_list(Token **start_tok, int is_block) {
 	AstNode *root = AstNode_new(AST_STATEMENT_LIST, 0);
 	Token *token = *start_tok;
-	while (token->type != TOKEN_EOF && !TOKEN_IS_SINGLE_CHAR(token, '}')) {
+	while (token->type != TOKEN_EOF && !TOKEN_IS_OPERATOR(token, "}")) {
 		AstNode_addsub(root, parse_statement(&token));
 	}
 	if ((is_block && token->type == TOKEN_EOF)
@@ -137,6 +138,6 @@ AstNode *parse_statement_list(Token **start_tok, int is_block) {
 
 void run_source(String *source) {
 	Token *tokens = tokenize_source(source);
-	AstNode *ast = parse_statement_list(&tokens, 0);
+	// AstNode *ast = parse_statement_list(&tokens, 0);
 	// TODO: run interpreter (maybe generate bytecode?)
 }

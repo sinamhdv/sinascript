@@ -3,9 +3,12 @@
 #ifndef MYHEADER_TOKEN_H
 #define MYHEADER_TOKEN_H
 
+/*
+double-char operators are: >= <= == !=
+*/
+
 typedef enum TokenType {
-	TOKEN_SINGLE = 0,	// single char token
-	TOKEN_COMPARE,		// > < = >= <= ==
+	TOKEN_OPERATOR = 0,	// operator token
 	TOKEN_STRING,		// string literal
 	TOKEN_NUMBER,		// number literal
 	TOKEN_KEYWORD,		// keyword
@@ -23,6 +26,9 @@ typedef struct Token {
 Token *add_token_to_list(Token **tok_list, Token *token);
 Token *Token_new(size_t str_size);
 
-#define TOKEN_IS_SINGLE_CHAR(t, c) ((t)->type == TOKEN_SINGLE && (t)->str.data[0] == (c))
+#define TOKEN_IS_OPERATOR(t, c) ((t)->type == TOKEN_OPERATOR \
+	&& (t)->str.size + 1 == sizeof((c)) \
+	&& (t)->str.data[0] == ((c)[0]) \
+	&& ((t)->str.size == 1 || (t)->str.data[1] == (c)[1]))
 
 #endif

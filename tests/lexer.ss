@@ -12,4 +12,5 @@ p = [1, 2, ["haha", x]]
 p[0] = 8
 l = p[0] + p[1]
 while2 = 5;
-ifabcd = 7;
+ifabcd = !!(7 != --8);
+
