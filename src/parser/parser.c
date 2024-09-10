@@ -11,38 +11,30 @@ static void parser_skip_single_char(Token **start_tok, char c) {
 }
 
 static AstNode *parse_primary_expression(Token **start_tok) {
-
-}
-
-static AstNode *parse_unary_expression(Token **start_tok) {
 	
 }
 
-static AstNode *parse_mul_expression(Token **start_tok) {
-	
+static AstNode *parse_unary_op_expression(Token **start_tok) {
+	if (!TOKEN_IS_SINGLE_CHAR(*start_tok, '-') && !TOKEN_IS_SINGLE_CHAR(*start_tok, '!'))
+		return parse_primary_expression(start_tok);
+	AstNode *root = AstNode_new(AST_UNARY_OP, 1);
+	root->op[0] = (*start_tok)->str.data[0];
+	*start_tok = (*start_tok)->next;
+	AstNode_addsub(root, parse_unary_op_expression(start_tok));
+	return root;
 }
 
-static AstNode *parse_add_expression(Token **start_tok) {
-	
-}
-
-static AstNode *parse_cmp_expression(Token **start_tok) {
-	
-}
-
-static AstNode *parse_and_expression(Token **start_tok) {
-	
-}
-
-// TODO: generalize this function to parse_binop_expression? maybe not
-// since add_expr and mul_expr have 2 operators and could be different.
-// cmp is also different because of 2-byte operators.
-static AstNode *parse_or_expression(Token **start_tok) {
-	AstNode *l_expr = parse_and_expression(start_tok);
-	if (TOKEN_IS_SINGLE_CHAR(*start_tok, '|')) {
-		AstNode *r_expr = parse_or_expression(start_tok);
+static AstNode *parse_bin_op_expression(Token **start_tok, int level) {
+	if (IS_PAST_LAST_BIN_OP_LEVEL(level))
+		return parse_unary_op_expression(start_tok);
+	AstNode *l_expr = parse_bin_op_expression(start_tok, level + 1);
+	if (TOKEN_IS_BIN_OP_LEVEL(*start_tok, level)) {
+		char op[2] = {(*start_tok)->str.data[0],
+			(*start_tok)->str.size > 1 ? (*start_tok)->str.data[1] : 0};
+		AstNode *r_expr = parse_bin_op_expression(start_tok, level);
 		AstNode *root = AstNode_new(AST_BIN_OP, 2);
-		root->op[0] = '|';
+		root->op[0] = op[0];
+		root->op[1] = op[1];
 		AstNode_addsub(root, l_expr);
 		AstNode_addsub(root, r_expr);
 		return root;
@@ -51,7 +43,7 @@ static AstNode *parse_or_expression(Token **start_tok) {
 }
 
 AstNode *parse_expression(Token **start_tok) {
-	return parse_or_expression(start_tok);
+	return parse_bin_op_expression(start_tok, 0);
 }
 
 static AstNode *parse_if_statement(Token **start_tok) {
