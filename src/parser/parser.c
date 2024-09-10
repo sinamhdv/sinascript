@@ -9,11 +9,59 @@ static void parser_skip_operator(Token **start_tok, char *op) {
 	*start_tok = (*start_tok)->next;
 }
 
+static AstNode *parse_identifier(Token **start_tok) {
+	
+}
+
+static AstNode *parse_number_literal(Token **start_tok) {
+	
+}
+
+static AstNode *parse_string_literal(Token **start_tok) {
+	
+}
+
+static AstNode *parse_bracket_expression(Token **start_tok) {
+	
+}
+
+static AstNode *parse_array_literal(Token **start_tok) {
+	
+}
+
+static AstNode *parse_index_expression(Token **start_tok) {
+	
+}
+
+static AstNode *parse_function_call_expression(Token **start_tok) {
+
+}
+
 static AstNode *parse_primary_expression(Token **start_tok) {
-	// switch ((*start_tok)->type) {
-	// 	case TOKEN_IDENTIFIER:
-	// 		break;
-	// }
+	switch ((*start_tok)->type) {
+		case TOKEN_IDENTIFIER: {	// identifier | function_call | index_expr
+			if (TOKEN_IS_OPERATOR((*start_tok)->next, "(")) {
+				return parse_function_call_expression(start_tok);
+			} else if (TOKEN_IS_OPERATOR((*start_tok)->next, "[")) {
+				return parse_index_expression(start_tok);
+			} else {
+				return parse_identifier(start_tok);
+			}
+			break;
+		}
+		case TOKEN_STRING:
+			return parse_string_literal(start_tok);
+		case TOKEN_NUMBER:
+			return parse_number_literal(start_tok);
+		case TOKEN_OPERATOR:	// array_literal or '(' expr ')'
+			if (TOKEN_IS_OPERATOR(*start_tok, "[")) {
+				return parse_array_literal(start_tok);
+			} else {
+				return parse_bracket_expression(start_tok);
+			}
+		default:
+			fatal_invalid_syntax();
+	}
 }
 
 static AstNode *parse_unary_op_expression(Token **start_tok) {
@@ -138,6 +186,6 @@ AstNode *parse_statement_list(Token **start_tok, int is_block) {
 
 void run_source(String *source) {
 	Token *tokens = tokenize_source(source);
-	// AstNode *ast = parse_statement_list(&tokens, 0);
+	AstNode *ast = parse_statement_list(&tokens, 0);
 	// TODO: run interpreter (maybe generate bytecode?)
 }
