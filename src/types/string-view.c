@@ -9,6 +9,15 @@ String *String_new(size_t size) {
 	return str;
 }
 
+int String_cmpstr(String *a, String *b) {
+	return (a->size == b->size && memcmp(a->data, b->data, a->size) == 0);
+}
+
+int String_cmparr(String *a, char *b) {
+	size_t b_size = strlen(b);
+	return (a->size == b_size && memcmp(a->data, b, b_size) == 0);
+}
+
 void String_free(String *str) {
 	free(str);
 }

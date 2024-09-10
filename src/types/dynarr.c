@@ -21,3 +21,9 @@ void DynArr_push(DynArr *dynarr, void *value) {
 	}
 	dynarr->arr[dynarr->size++] = value;
 }
+
+void DynArr_free(DynArr *dynarr) {
+	free(dynarr->arr);
+	dynarr->arr = NULL;
+	dynarr->size = dynarr->capacity = 0;
+}
