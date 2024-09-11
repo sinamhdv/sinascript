@@ -22,51 +22,80 @@ static AstNode *parse_string_literal(Token **start_tok) {
 }
 
 static AstNode *parse_bracket_expression(Token **start_tok) {
-	
+	parser_skip_operator(start_tok, "(");
+	AstNode *root = parse_expression(start_tok);
+	parser_skip_operator(start_tok, ")");
+	return root;
 }
 
 static AstNode *parse_array_literal(Token **start_tok) {
 	
 }
 
-static AstNode *parse_index_expression(Token **start_tok) {
+// static AstNode *parse_primary_expression(Token **start_tok) {
+// 	switch ((*start_tok)->type) {
+// 		case TOKEN_IDENTIFIER: {	// identifier | function_call | index_expr
+// 			if (TOKEN_IS_OPERATOR((*start_tok)->next, "(")) {
+// 				return parse_function_call_expression(start_tok);
+// 			} else if (TOKEN_IS_OPERATOR((*start_tok)->next, "[")) {
+// 				return parse_index_expression(start_tok);
+// 			} else {
+// 				return parse_identifier(start_tok);
+// 			}
+// 			break;
+// 		}
+// 		case TOKEN_STRING:
+// 			return parse_string_literal(start_tok);
+// 		case TOKEN_NUMBER:
+// 			return parse_number_literal(start_tok);
+// 		case TOKEN_OPERATOR:	// array_literal or '(' expr ')'
+// 			if (TOKEN_IS_OPERATOR(*start_tok, "[")) {
+// 				return parse_array_literal(start_tok);
+// 			} else {
+// 				return parse_bracket_expression(start_tok);
+// 			}
+// 		default:
+// 			fatal_invalid_syntax();
+// 	}
+// }
+
+static AstNode *parse_expression_list(Token **start_tok) {
 	
 }
 
-static AstNode *parse_function_call_expression(Token **start_tok) {
+static AstNode *parse_primary_expression(Token **start_tok) {
 
 }
 
-static AstNode *parse_primary_expression(Token **start_tok) {
-	switch ((*start_tok)->type) {
-		case TOKEN_IDENTIFIER: {	// identifier | function_call | index_expr
-			if (TOKEN_IS_OPERATOR((*start_tok)->next, "(")) {
-				return parse_function_call_expression(start_tok);
-			} else if (TOKEN_IS_OPERATOR((*start_tok)->next, "[")) {
-				return parse_index_expression(start_tok);
-			} else {
-				return parse_identifier(start_tok);
-			}
-			break;
-		}
-		case TOKEN_STRING:
-			return parse_string_literal(start_tok);
-		case TOKEN_NUMBER:
-			return parse_number_literal(start_tok);
-		case TOKEN_OPERATOR:	// array_literal or '(' expr ')'
-			if (TOKEN_IS_OPERATOR(*start_tok, "[")) {
-				return parse_array_literal(start_tok);
-			} else {
-				return parse_bracket_expression(start_tok);
-			}
-		default:
-			fatal_invalid_syntax();
-	}
+static AstNode *parse_function_call_expression(Token **start_tok) {
+	AstNode *func = parse_primary_expression(start_tok);
+	if (!TOKEN_IS_OPERATOR(*start_tok, "("))
+		return func;
+	parser_skip_operator(start_tok, "(");
+	AstNode *arg_list = parse_expression_list(start_tok);
+	parser_skip_operator(start_tok, ")");
+	AstNode *root = AstNode_new(AST_FUNCTION_CALL, 2);
+	AstNode_addsub(root, func);
+	AstNode_addsub(root, arg_list);
+	return root;
+}
+
+static AstNode *parse_index_expression(Token **start_tok) {
+	AstNode *array = parse_function_call_expression(start_tok);
+	if (!TOKEN_IS_OPERATOR(*start_tok, "["))
+		return array;
+	parser_skip_operator(start_tok, "[");
+	AstNode *index_val = parse_expression(start_tok);
+	parser_skip_operator(start_tok, "]");
+	AstNode *root = AstNode_new(AST_INDEX, 2);
+	AstNode_addsub(root, array);
+	AstNode_addsub(root, index_val);
+	return root;
 }
 
 static AstNode *parse_unary_op_expression(Token **start_tok) {
 	if (!TOKEN_IS_OPERATOR(*start_tok, "-") && !TOKEN_IS_OPERATOR(*start_tok, "!"))
-		return parse_primary_expression(start_tok);
+		return parse_index_expression(start_tok);
 	AstNode *root = AstNode_new(AST_UNARY_OP, 1);
 	root->op[0] = (*start_tok)->str.data[0];
 	*start_tok = (*start_tok)->next;

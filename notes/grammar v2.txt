@@ -1,0 +1,43 @@
+program: statement_list
+
+statement_list: statement | statement statement_list
+statement:
+	if_statement
+	while_statement
+	async_statement
+	expr_statement
+	assignment_statement
+
+if_statement: 'if' '(' expr ')' block else_statement
+else_statement: <empty> | 'else' block
+block: '{' statement_list '}'
+
+while_statement: 'while' '(' expr ')' block
+async_statement: 'async' block
+
+assignment_statement: lvalue '=' expr ';'
+lvalue: ident | index_expr
+
+expr_statement: expr ';'
+expr: or_expr
+or_expr: and_expr | and_expr '|' or_expr
+and_expr: cmp_expr | cmp_expr '&' and_expr
+cmp_expr: add_expr | add_expr '<'/'=='/'>'/'<='/'>=' cmp_expr
+add_expr: mul_expr | mul_expr '+'/'-' add_expr
+mul_expr: unry_expr | unry_expr '*'/'/' mul_expr
+unry_expr: index_expr | '-' unry_expr | '!' unry_expr
+index_expr: function_call_expr | function_call_expr '[' expr ']'
+function_call_expr: primary_expr | primary_expr '(' expr_list ')'
+primary_expr:
+	ident
+	literal
+	'(' expr ')'
+
+expr_list: <empty> | expr | expr ',' expr_list
+
+ident: [A-Za-z][A-Za-z0-9]*
+
+literal: num_literal | str_literal | arr_literal
+num_literal = [0-9]+
+str_literal = TODO
+arr_literal = '[' expr_list ']'
