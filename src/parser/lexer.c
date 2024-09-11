@@ -143,18 +143,18 @@ Token *tokenize_source(String *source) {
 		}
 
 #ifdef DEBUG
-		switch (token->type) {
-			case TOKEN_OPERATOR: printf("[OPERATOR] "); break;
-			case TOKEN_STRING: printf("[STRING] "); break;
-			case TOKEN_NUMBER: printf("[NUMBER] "); break;
-			case TOKEN_KEYWORD: printf("[KEYWORD] "); break;
-			case TOKEN_IDENTIFIER: printf("[IDENTIFIER] "); break;
-			default: printf("[TOKEN_#%d] ", token->type); break;
-		}
+		// switch (token->type) {
+		// 	case TOKEN_OPERATOR: printf("[OPERATOR] "); break;
+		// 	case TOKEN_STRING: printf("[STRING] "); break;
+		// 	case TOKEN_NUMBER: printf("[NUMBER] "); break;
+		// 	case TOKEN_KEYWORD: printf("[KEYWORD] "); break;
+		// 	case TOKEN_IDENTIFIER: printf("[IDENTIFIER] "); break;
+		// 	default: printf("[TOKEN_#%d] ", token->type); break;
+		// }
 		putchar('\'');
 		fwrite(token->str.data, 1, token->str.size, stdout);
 		putchar('\'');
-		putchar('\n');
+		putchar(' ');
 #endif
 
 		i += token->str.size;
