@@ -27,8 +27,6 @@ Token *add_token_to_list(Token **tok_list, Token *token);
 Token *Token_new(size_t str_size);
 
 #define TOKEN_IS_OPERATOR(t, c) ((t)->type == TOKEN_OPERATOR \
-	&& (t)->str.size + 1 == sizeof((c)) \
-	&& (t)->str.data[0] == ((c)[0]) \
-	&& ((t)->str.size == 1 || (t)->str.data[1] == (c)[1]))
+	&& String_cmparr(&(t)->str, (c)) == 0)
 
 #endif

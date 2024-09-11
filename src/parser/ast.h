@@ -15,6 +15,7 @@ typedef enum AstNodeType {
 	AST_ASSIGNMENT,
 
 	// expressions
+	AST_EXPR_LIST,	// comma-separated list of expressions
 	AST_BIN_OP,	// binary ops: | & < > <= >= == + - * /
 	AST_UNARY_OP,	// unary ops: ! -
 	AST_INDEX,	// array indexing: a[i]
