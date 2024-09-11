@@ -202,6 +202,7 @@ static AstNode *parse_bin_op_expression(Token **start_tok, int level) {
 	if (TOKEN_IS_BIN_OP_LEVEL(*start_tok, level)) {
 		char op[2] = {(*start_tok)->str.data[0],
 			(*start_tok)->str.size > 1 ? (*start_tok)->str.data[1] : 0};
+		*start_tok = (*start_tok)->next;
 		AstNode *r_expr = parse_bin_op_expression(start_tok, level);
 		AstNode *root = AstNode_new(AST_BIN_OP, 2);
 		root->op[0] = op[0];
@@ -228,7 +229,7 @@ static AstNode *parse_if_statement(Token **start_tok) {
 	parser_skip_operator(start_tok, "}");
 	
 	// parse optional else block
-	if ((*start_tok)->type == TOKEN_KEYWORD && String_cmparr(&(*start_tok)->str, "else")) {
+	if ((*start_tok)->type == TOKEN_KEYWORD && String_cmparr(&(*start_tok)->str, "else") == 0) {
 		*start_tok = (*start_tok)->next;
 		parser_skip_operator(start_tok, "{");
 		DynArr_resize(&root->subs, 3);
