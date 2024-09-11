@@ -151,10 +151,10 @@ Token *tokenize_source(String *source) {
 		// 	case TOKEN_IDENTIFIER: printf("[IDENTIFIER] "); break;
 		// 	default: printf("[TOKEN_#%d] ", token->type); break;
 		// }
-		putchar('\'');
-		fwrite(token->str.data, 1, token->str.size, stdout);
-		putchar('\'');
-		putchar(' ');
+		fputc('\'', stderr);
+		fwrite(token->str.data, 1, token->str.size, stderr);
+		fputc('\'', stderr);
+		fputc(' ', stderr);
 #endif
 
 		i += token->str.size;
@@ -164,6 +164,10 @@ Token *tokenize_source(String *source) {
 	Token *eof_token = Token_new(0);
 	eof_token->type = TOKEN_EOF;
 	add_token_to_list(&tok_list, eof_token);
+
+#ifdef DEBUG
+	fprintf(stderr, "EOF\n\n");
+#endif
 
 	return tok_list;
 }
