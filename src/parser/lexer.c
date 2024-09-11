@@ -14,10 +14,10 @@ static size_t skip_whitespace(String *source, size_t i) {
 static int get_keyword_size_at(String *source, size_t i) {
 	char *keywords[] = {"if", "else", "while", "async"};
 	size_t keywords_size = sizeof(keywords) / sizeof(char *);
-	for (size_t i = 0; i < keywords_size; i++) {
-		size_t size = strlen(keywords[i]);
+	for (size_t k = 0; k < keywords_size; k++) {
+		size_t size = strlen(keywords[k]);
 		if (i + size <= source->size) {
-			if (memcmp(source->data + i, keywords[i], size) == 0) {
+			if (memcmp(source->data + i, keywords[k], size) == 0) {
 				if (i + size >= source->size) return size;
 				char after_keyword = source->data[i + size];
 				if (isalnum(after_keyword))
@@ -137,18 +137,18 @@ Token *tokenize_source(String *source) {
 		}
 
 #ifdef DEBUG
-		// switch (token->type) {
-		// 	case TOKEN_OPERATOR: printf("[OPERATOR] "); break;
-		// 	case TOKEN_STRING: printf("[STRING] "); break;
-		// 	case TOKEN_NUMBER: printf("[NUMBER] "); break;
-		// 	case TOKEN_KEYWORD: printf("[KEYWORD] "); break;
-		// 	case TOKEN_IDENTIFIER: printf("[IDENTIFIER] "); break;
-		// 	default: printf("[TOKEN_#%d] ", token->type); break;
-		// }
+		switch (token->type) {
+			case TOKEN_OPERATOR: fprintf(stderr, "[OPR] "); break;
+			case TOKEN_STRING: fprintf(stderr, "[STR] "); break;
+			case TOKEN_NUMBER: fprintf(stderr, "[NUM] "); break;
+			case TOKEN_KEYWORD: fprintf(stderr, "[KEY] "); break;
+			case TOKEN_IDENTIFIER: fprintf(stderr, "[IDN] "); break;
+			default: break;
+		}
 		fputc('\'', stderr);
 		fwrite(token->str.data, 1, token->str.size, stderr);
 		fputc('\'', stderr);
-		fputc(' ', stderr);
+		fputc('\n', stderr);
 #endif
 
 		i += token->str.size;
