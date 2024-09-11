@@ -9,6 +9,7 @@ AstNode *AstNode_new(AstNodeType type, size_t size) {
 		DynArr_init(&node->subs, size);
 	} else {
 		node = checked_malloc(sizeof(AstNode) + size);
+		node->ident.size = size;
 	}
 	node->type = type;
 	return node;

@@ -14,7 +14,10 @@ static void parser_skip_operator(Token **start_tok, char *op) {
 }
 
 static AstNode *parse_identifier(Token **start_tok) {
-	
+	AstNode *node = AstNode_new(AST_IDENTIFIER, (*start_tok)->str.size);
+	memcpy(node->ident.data, (*start_tok)->str.data, node->ident.size);
+	*start_tok = (*start_tok)->next;
+	return node;
 }
 
 static AstNode *parse_number_literal(Token **start_tok) {
