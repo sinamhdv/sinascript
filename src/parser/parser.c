@@ -8,6 +8,62 @@
 #include <errno.h>
 #include <limits.h>
 
+static size_t _get_string_literal_real_length(String *lit) {
+	size_t result = 0, i = 1, n = lit->size;
+	while (lit->data[i] != '"') {
+		if (lit->data[i] == '\\') {
+			if (i + 2 == n) fatal_invalid_syntax();
+			char c = lit->data[i + 1];
+			if (c == 'x') {
+				if (i + 5 > n) fatal_invalid_syntax();
+				i += 4;
+				result++;
+			} else {
+				i += 2;
+				result++;
+			}
+		} else {
+			result++;
+			i++;
+		}
+	}
+	return result;
+}
+
+static void _do_parse_string_literal(String *lit, String *result) {
+	size_t i = 1, n = lit->size;
+	char *resptr = result->data;
+	while (lit->data[i] != '"') {
+		if (lit->data[i] == '\\') {
+			char c = lit->data[i + 1];
+			switch (c) {
+				case '0': *resptr++ = '\0'; break;
+				case 'a': *resptr++ = '\a'; break;
+				case 'b': *resptr++ = '\b'; break;
+				case 't': *resptr++ = '\t'; break;
+				case 'n': *resptr++ = '\n'; break;
+				case 'v': *resptr++ = '\v'; break;
+				case 'f': *resptr++ = '\f'; break;
+				case 'r': *resptr++ = '\r'; break;
+				case '"': *resptr++ = '"'; break;
+				case '\'': *resptr++ = '\''; break;
+				case '\\': *resptr++ = '\\'; break;
+				default: fatal_invalid_syntax();
+			}
+		} else {
+			*resptr++ = lit->data[i++];
+		}
+	}
+}
+
+static AstNode *parse_string_literal(Token **start_tok) {
+	size_t real_len = _get_string_literal_real_length(&(*start_tok)->str);
+	AstNode *node = AstNode_new(AST_STRING, real_len);
+	_do_parse_string_literal(&(*start_tok)->str, &node->str);
+	*start_tok = (*start_tok)->next;
+	return node;
+}
+
 static void parser_skip_operator(Token **start_tok, char *op) {
 	if (!TOKEN_IS_OPERATOR(*start_tok, op)) fatal_invalid_syntax();
 	*start_tok = (*start_tok)->next;
@@ -35,10 +91,6 @@ static AstNode *parse_number_literal(Token **start_tok) {
 	node->num = num;
 	*start_tok = (*start_tok)->next;
 	return node;
-}
-
-static AstNode *parse_string_literal(Token **start_tok) {
-	
 }
 
 static AstNode *parse_bracket_expression(Token **start_tok) {
