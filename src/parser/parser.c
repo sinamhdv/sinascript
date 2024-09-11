@@ -3,6 +3,10 @@
 #include "token.h"
 #include "ast.h"
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <limits.h>
 
 static void parser_skip_operator(Token **start_tok, char *op) {
 	if (!TOKEN_IS_OPERATOR(*start_tok, op)) fatal_invalid_syntax();
@@ -14,7 +18,20 @@ static AstNode *parse_identifier(Token **start_tok) {
 }
 
 static AstNode *parse_number_literal(Token **start_tok) {
-	
+	char digits_buf[32];
+	size_t smaller_size = (*start_tok)->str.size;
+	if (sizeof(digits_buf) - 1 < smaller_size)
+		smaller_size = sizeof(digits_buf) - 1;
+	memcpy(digits_buf, (*start_tok)->str.data, smaller_size);
+	digits_buf[smaller_size] = 0;
+
+	Number num = (Number)strtoll(digits_buf, NULL, 10);
+	if (num == (Number)LLONG_MAX && errno == ERANGE)
+		fatal_invalid_syntax();
+	AstNode *node = AstNode_new(AST_NUMBER, 0);
+	node->num = num;
+	*start_tok = (*start_tok)->next;
+	return node;
 }
 
 static AstNode *parse_string_literal(Token **start_tok) {
@@ -247,5 +264,7 @@ AstNode *parse_statement_list(Token **start_tok, int is_block) {
 void run_source(String *source) {
 	Token *tokens = tokenize_source(source);
 	AstNode *ast = parse_statement_list(&tokens, 0);
+	// TODO: free tokens
 	// TODO: run interpreter (maybe generate bytecode?)
+	// TODO free ast and all other resources (except source) before returning
 }
