@@ -2,20 +2,21 @@
 #include "lexer.h"
 #include "token.h"
 #include "ast.h"
+#include "syntax-errors.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
 
-static size_t _get_string_literal_real_length(String *lit) {
+static size_t _get_string_literal_real_length(String *lit, Token *token) {
 	size_t result = 0, i = 1, n = lit->size;
 	while (lit->data[i] != '"') {
 		if (lit->data[i] == '\\') {
-			if (i + 2 == n) fatal_invalid_syntax();
+			if (i + 2 == n) fatal_invalid_syntax(token);
 			char c = lit->data[i + 1];
 			if (c == 'x') {
-				if (i + 5 > n) fatal_invalid_syntax();
+				if (i + 5 > n) fatal_invalid_syntax(token);
 				i += 4;
 				result++;
 			} else {
@@ -35,13 +36,13 @@ static size_t _get_string_literal_real_length(String *lit) {
 #define HEX_DIGIT_VALUE(c) (('0' <= (c) && (c) <= '9') ? (c) - '0' \
 	: (('a' <= (c) && (c) <= 'f') ? (c) - 'a' : (c) - 'A'))
 
-static char _parse_string_hex_escape(char *ptr) {
+static char _parse_string_hex_escape(char *ptr, Token *token) {
 	if (!IS_HEX_DIGIT(ptr[0]) || !IS_HEX_DIGIT(ptr[1]))
-		fatal_invalid_syntax();
+		fatal_invalid_syntax(token);
 	return (HEX_DIGIT_VALUE(ptr[0]) << 4) | (HEX_DIGIT_VALUE(ptr[1]));
 }
 
-static void _do_parse_string_literal(String *lit, String *result) {
+static void _do_parse_string_literal(String *lit, String *result, Token *token) {
 	size_t i = 1;
 	char *resptr = result->data;
 	while (lit->data[i] != '"') {
@@ -60,10 +61,10 @@ static void _do_parse_string_literal(String *lit, String *result) {
 				case '\'': *resptr++ = '\''; break;
 				case '\\': *resptr++ = '\\'; break;
 				case 'x':
-					*resptr++ = _parse_string_hex_escape(lit->data + i + 2);
+					*resptr++ = _parse_string_hex_escape(lit->data + i + 2, token);
 					i += 2;
 					break;
-				default: fatal_invalid_syntax();
+				default: fatal_invalid_syntax(token);
 			}
 			i += 2;
 		} else {
@@ -73,15 +74,16 @@ static void _do_parse_string_literal(String *lit, String *result) {
 }
 
 static AstNode *parse_string_literal(Token **start_tok) {
-	size_t real_len = _get_string_literal_real_length(&(*start_tok)->str);
+	size_t real_len = _get_string_literal_real_length(&(*start_tok)->str, *start_tok);
 	AstNode *node = AstNode_new(AST_STRING, real_len);
-	_do_parse_string_literal(&(*start_tok)->str, &node->str);
+	_do_parse_string_literal(&(*start_tok)->str, &node->str, *start_tok);
 	*start_tok = (*start_tok)->next;
 	return node;
 }
 
 static void parser_skip_operator(Token **start_tok, char *op) {
-	if (!TOKEN_IS_OPERATOR(*start_tok, op)) fatal_invalid_syntax();
+	if (!TOKEN_IS_OPERATOR(*start_tok, op))
+		fatal_invalid_syntax(*start_tok);
 	*start_tok = (*start_tok)->next;
 }
 
@@ -102,7 +104,7 @@ static AstNode *parse_number_literal(Token **start_tok) {
 
 	Number num = (Number)strtoll(digits_buf, NULL, 10);
 	if (num == (Number)LLONG_MAX && errno == ERANGE)
-		fatal_invalid_syntax();
+		fatal_invalid_syntax(*start_tok);
 	AstNode *node = AstNode_new(AST_NUMBER, 0);
 	node->num = num;
 	*start_tok = (*start_tok)->next;
@@ -124,7 +126,7 @@ static AstNode *parse_expression_list(Token **start_tok, char *ending_op) {
 		parser_skip_operator(start_tok, ",");
 	}
 	if (!TOKEN_IS_OPERATOR(*start_tok, ending_op))
-		fatal_invalid_syntax();
+		fatal_invalid_syntax(*start_tok);
 	return root;
 }
 
@@ -145,38 +147,9 @@ static AstNode *parse_literal(Token **start_tok) {
 		case TOKEN_NUMBER:
 			return parse_number_literal(start_tok);
 		default:
-			fatal_invalid_syntax();
+			fatal_invalid_syntax(*start_tok);
 	}
 }
-
-/*
-static AstNode *parse_primary_expression(Token **start_tok) {
-	switch ((*start_tok)->type) {
-		case TOKEN_IDENTIFIER: {	// identifier | function_call | index_expr
-			if (TOKEN_IS_OPERATOR((*start_tok)->next, "(")) {
-				return parse_function_call_expression(start_tok);
-			} else if (TOKEN_IS_OPERATOR((*start_tok)->next, "[")) {
-				return parse_index_expression(start_tok);
-			} else {
-				return parse_identifier(start_tok);
-			}
-			break;
-		}
-		case TOKEN_STRING:
-			return parse_string_literal(start_tok);
-		case TOKEN_NUMBER:
-			return parse_number_literal(start_tok);
-		case TOKEN_OPERATOR:	// array_literal or '(' expr ')'
-			if (TOKEN_IS_OPERATOR(*start_tok, "[")) {
-				return parse_array_literal(start_tok);
-			} else {
-				return parse_bracket_expression(start_tok);
-			}
-		default:
-			fatal_invalid_syntax();
-	}
-}
-*/
 
 static AstNode *parse_primary_expression(Token **start_tok) {
 	if ((*start_tok)->type == TOKEN_IDENTIFIER)
@@ -297,14 +270,13 @@ static AstNode *parse_statement(Token **start_tok) {
 		} else if (String_cmparr(&token->str, "async") == 0) {
 			return parse_async_statement(start_tok);
 		} else {
-			fatal_invalid_syntax();
+			fatal_invalid_syntax(*start_tok);
 		}
 	} else {	// expression_statement | assignment_statement
 		AstNode *expr = parse_expression(start_tok);
-		token = *start_tok;
-		if (TOKEN_IS_OPERATOR(token, "=")) {	// assignment_statement
+		if (TOKEN_IS_OPERATOR((*start_tok), "=")) {	// assignment_statement
 			if (!ASTNODETYPE_IS_ASSIGNMENT_LVALUE(expr->type))
-				fatal_invalid_syntax();
+				fatal_invalid_syntax((*start_tok));
 			parser_skip_operator(start_tok, "=");
 			AstNode *rvalue = parse_expression(start_tok);
 			parser_skip_operator(start_tok, ";");
@@ -321,21 +293,19 @@ static AstNode *parse_statement(Token **start_tok) {
 
 AstNode *parse_statement_list(Token **start_tok, int is_block) {
 	AstNode *root = AstNode_new(AST_STATEMENT_LIST, 0);
-	Token *token = *start_tok;
-	while (token->type != TOKEN_EOF && !TOKEN_IS_OPERATOR(token, "}")) {
-		AstNode_addsub(root, parse_statement(&token));
+	while ((*start_tok)->type != TOKEN_EOF && !TOKEN_IS_OPERATOR(*start_tok, "}")) {
+		AstNode_addsub(root, parse_statement(start_tok));
 	}
-	if ((is_block && token->type == TOKEN_EOF)
-		|| (!is_block && token->type != TOKEN_EOF))
-		fatal_invalid_syntax();
-	*start_tok = token;
+	if ((is_block && (*start_tok)->type == TOKEN_EOF)
+		|| (!is_block && (*start_tok)->type != TOKEN_EOF))
+		fatal_invalid_syntax(*start_tok);
 	return root;
 }
 
 void run_source(String *source) {
 	Token *tokens = tokenize_source(source);
 	AstNode *ast = parse_statement_list(&tokens, 0);
-	// TODO: free tokens
+	// TODO: free tokens (or not? useful for showing precise error locations to the user?)
 	// TODO: run interpreter (maybe generate bytecode?)
 	// TODO free ast and all other resources (except source) before returning
 }

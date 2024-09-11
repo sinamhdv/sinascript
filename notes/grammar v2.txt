@@ -15,8 +15,7 @@ block: '{' statement_list '}'
 while_statement: 'while' '(' expr ')' block
 async_statement: 'async' block
 
-assignment_statement: lvalue '=' expr ';'
-lvalue: ident | index_expr
+assignment_statement: expr '=' expr ';'
 
 expr_statement: expr ';'
 expr: or_expr

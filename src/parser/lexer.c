@@ -1,15 +1,9 @@
 #include "lexer.h"
 #include "../utils/utils.h"
+#include "syntax-errors.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
-
-void fatal_invalid_syntax(void) {
-#ifdef DEBUG
-	fprintf(stderr, "Syntax Error\n");
-#endif
-	exit(1);
-}
 
 static size_t skip_whitespace(String *source, size_t i) {
 	while (i < source->size && isspace(source->data[i]))
@@ -50,7 +44,7 @@ static Token *get_string_literal_token(String *source, size_t i) {
 	i++;
 	while (i < source->size) {
 		if (source->data[i] == '\\') {
-			if (i + 1 >= source->size) fatal_invalid_syntax();
+			if (i + 1 >= source->size) fatal_invalid_syntax(NULL);
 			i += 2;
 		} else if (source->data[i] == '"') {
 			break;
@@ -58,7 +52,7 @@ static Token *get_string_literal_token(String *source, size_t i) {
 			i++;
 		}
 	}
-	if (i >= source->size || source->data[i] != '"') fatal_invalid_syntax();
+	if (i >= source->size || source->data[i] != '"') fatal_invalid_syntax(NULL);
 	i++;
 	Token *token = Token_new(i - start_i);
 	token->type = TOKEN_STRING;
@@ -71,7 +65,7 @@ static Token *get_num_literal_token(String *source, size_t i) {
 	while (i + digits_cnt < source->size && isdigit(source->data[i + digits_cnt]))
 		digits_cnt++;
 	if (i + digits_cnt < source->size && isalpha(source->data[i + digits_cnt])) {
-		fatal_invalid_syntax();
+		fatal_invalid_syntax(NULL);
 	}
 	Token *token = Token_new(digits_cnt);
 	token->type = TOKEN_NUMBER;
@@ -91,7 +85,7 @@ static Token *get_identifier_token(String *source, size_t i) {
 	size_t ident_size = 0;
 	while (i + ident_size < source->size && isalnum(source->data[i + ident_size]))
 		ident_size++;
-	if (ident_size == 0) fatal_invalid_syntax();
+	if (ident_size == 0) fatal_invalid_syntax(NULL);
 	Token *token = Token_new(ident_size);
 	token->type = TOKEN_IDENTIFIER;
 	memcpy(token->str.data, source->data + i, ident_size);
