@@ -30,8 +30,19 @@ static size_t _get_string_literal_real_length(String *lit) {
 	return result;
 }
 
+#define IS_HEX_DIGIT(c) (('0' <= (c) && (c) <= '9') || ('a' <= (c) && (c) <= 'f') || ('A' <= (c) && (c) <= 'F'))
+
+#define HEX_DIGIT_VALUE(c) (('0' <= (c) && (c) <= '9') ? (c) - '0' \
+	: (('a' <= (c) && (c) <= 'f') ? (c) - 'a' : (c) - 'A'))
+
+static char _parse_string_hex_escape(char *ptr) {
+	if (!IS_HEX_DIGIT(ptr[0]) || !IS_HEX_DIGIT(ptr[1]))
+		fatal_invalid_syntax();
+	return (HEX_DIGIT_VALUE(ptr[0]) << 4) | (HEX_DIGIT_VALUE(ptr[1]));
+}
+
 static void _do_parse_string_literal(String *lit, String *result) {
-	size_t i = 1, n = lit->size;
+	size_t i = 1;
 	char *resptr = result->data;
 	while (lit->data[i] != '"') {
 		if (lit->data[i] == '\\') {
@@ -48,8 +59,13 @@ static void _do_parse_string_literal(String *lit, String *result) {
 				case '"': *resptr++ = '"'; break;
 				case '\'': *resptr++ = '\''; break;
 				case '\\': *resptr++ = '\\'; break;
+				case 'x':
+					*resptr++ = _parse_string_hex_escape(lit->data + i + 2);
+					i += 2;
+					break;
 				default: fatal_invalid_syntax();
 			}
+			i += 2;
 		} else {
 			*resptr++ = lit->data[i++];
 		}
