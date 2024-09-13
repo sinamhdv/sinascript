@@ -148,7 +148,7 @@ Token *tokenize_source(String *source) {
 		fputc('\'', stderr);
 		fwrite(token->str.data, 1, token->str.size, stderr);
 		fputc('\'', stderr);
-		fputc('\n', stderr);
+		fputs("  ", stderr);
 #endif
 
 		i += token->str.size;

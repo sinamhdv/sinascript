@@ -2,7 +2,8 @@
 #include "../utils/utils.h"
 
 void DynArr_init(DynArr *dynarr, size_t init_size) {
-	dynarr->size = dynarr->capacity = init_size;
+	dynarr->capacity = init_size;
+	dynarr->size = 0;
 	dynarr->arr = (init_size == 0 ? NULL : checked_malloc(init_size * sizeof(void *)));
 }
 

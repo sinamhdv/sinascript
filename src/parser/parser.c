@@ -303,9 +303,58 @@ AstNode *parse_statement_list(Token **start_tok, int is_block) {
 	return root;
 }
 
+// #ifdef DEBUG
+static void debug_ast(AstNode *root, int level) {
+	for (int i = 0; i < level; i++) putchar('\t');
+	char *ast_type_names[] = {
+	"AST_STATEMENT_LIST",
+	"AST_IF",
+	"AST_WHILE",
+	"AST_ASYNC",
+	"AST_ASSIGNMENT",
+	"AST_EXPR_LIST",
+	"AST_BIN_OP",
+	"AST_UNARY_OP",
+	"AST_INDEX",
+	"AST_IDENTIFIER",
+	"AST_FUNCTION_CALL",
+	"AST_NUMBER",
+	"AST_STRING",
+	"AST_ARRAY",
+	};
+	if (root->type >= sizeof(ast_type_names)/sizeof(char*)) {
+		printf("Invalid type!: %d\n", root->type);
+		exit(1);
+	}
+	printf("%s(", ast_type_names[root->type]);
+	switch (root->type) {
+		case AST_NUMBER:
+			printf("%ld)\n", root->num);
+			break;
+		case AST_STRING:
+			fwrite(root->str.data, 1, root->str.size, stdout);
+			printf(")\n");
+			break;
+		case AST_IDENTIFIER:
+			fwrite(root->str.data, 1, root->str.size, stdout);
+			printf(")\n");
+			break;
+		default:
+			printf("%c%c) #%lu\n", root->op[0], root->op[1], root->subs.size);
+			for (size_t i = 0; i < root->subs.size; i++) {
+				debug_ast(root->subs.arr[i], level + 1);
+			}
+			break;
+	}
+}
+// #endif
+
 void run_source(String *source) {
 	Token *tokens = tokenize_source(source);
 	AstNode *ast = parse_statement_list(&tokens, 0);
+#ifdef DEBUG
+	debug_ast(ast, 0);
+#endif
 	// TODO: free tokens (or not? useful for showing precise error locations to the user?)
 	// TODO: run interpreter (maybe generate bytecode?)
 	// TODO free ast and all other resources (except source) before returning
