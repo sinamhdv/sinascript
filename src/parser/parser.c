@@ -2,7 +2,8 @@
 #include "lexer.h"
 #include "token.h"
 #include "ast.h"
-#include "syntax-errors.h"
+#include "../utils/errors.h"
+#include "../vm/vm.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -305,7 +306,7 @@ AstNode *parse_statement_list(Token **start_tok, int is_block) {
 	return root;
 }
 
-// #ifdef DEBUG
+#ifdef DEBUG
 static void debug_ast(AstNode *root, int level) {
 	for (int i = 0; i < level; i++) putchar('\t');
 	char *ast_type_names[] = {
@@ -349,7 +350,7 @@ static void debug_ast(AstNode *root, int level) {
 			break;
 	}
 }
-// #endif
+#endif
 
 void run_source(String *source) {
 	Token *tokens = tokenize_source(source);
@@ -358,6 +359,7 @@ void run_source(String *source) {
 	debug_ast(ast, 0);
 #endif
 	// TODO: free tokens (or not? useful for showing precise error locations to the user?)
-	// TODO: run interpreter (maybe generate bytecode?)
+	// TODO: generate bytecode?
+	vm_main(ast);
 	// TODO free ast and all other resources (except source) before returning
 }

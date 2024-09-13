@@ -1,6 +1,6 @@
 #include "lexer.h"
 #include "../utils/utils.h"
-#include "syntax-errors.h"
+#include "../utils/errors.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
