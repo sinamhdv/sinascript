@@ -195,23 +195,25 @@ static AstNode *parse_unary_op_expression(Token **start_tok) {
 	return root;
 }
 
+// loop implementation so we get left-to-right order for sth like (1 - 2 - 3)
 static AstNode *parse_bin_op_expression(Token **start_tok, int level) {
 	if (IS_PAST_LAST_BIN_OP_LEVEL(level))
 		return parse_unary_op_expression(start_tok);
 	AstNode *l_expr = parse_bin_op_expression(start_tok, level + 1);
-	if (TOKEN_IS_BIN_OP_LEVEL(*start_tok, level)) {
+	AstNode *cur_root = l_expr;
+	while (TOKEN_IS_BIN_OP_LEVEL(*start_tok, level)) {
 		char op[2] = {(*start_tok)->str.data[0],
 			(*start_tok)->str.size > 1 ? (*start_tok)->str.data[1] : 0};
 		*start_tok = (*start_tok)->next;
-		AstNode *r_expr = parse_bin_op_expression(start_tok, level);
-		AstNode *root = AstNode_new(AST_BIN_OP, 2);
-		root->op[0] = op[0];
-		root->op[1] = op[1];
-		AstNode_addsub(root, l_expr);
-		AstNode_addsub(root, r_expr);
-		return root;
+		AstNode *r_expr = parse_bin_op_expression(start_tok, level + 1);
+		AstNode *new_root = AstNode_new(AST_BIN_OP, 2);
+		new_root->op[0] = op[0];
+		new_root->op[1] = op[1];
+		AstNode_addsub(new_root, cur_root);
+		AstNode_addsub(new_root, r_expr);
+		cur_root = new_root;
 	}
-	return l_expr;
+	return cur_root;
 }
 
 AstNode *parse_expression(Token **start_tok) {
