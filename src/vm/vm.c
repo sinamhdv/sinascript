@@ -4,28 +4,33 @@
 #include "../objects/ss-value.h"
 #include "../objects/ss-string.h"
 #include "../objects/ss-array.h"
-#include "../heap/heap.h"
 #include <assert.h>
 #include <string.h>
 
 static SSValue vm_run_bin_op(AstNode *node) {
-
+	// TODO
 }
 
 static SSValue vm_run_unary_op(AstNode *node) {
-
+	// TODO
 }
 
 static SSValue vm_read_index(AstNode *node) {
-
+	// TODO
 }
 
 static SSValue vm_get_identifier_value(AstNode *node) {
+	// TODO
+}
+
+static SSArray *vm_eval_expression_list(AstNode *node) {
+	DBGCHECK(node->type == AST_EXPR_LIST);
+	SSArray *arr = SSArray_new(node->subs.size);
 
 }
 
 static SSValue vm_function_call(AstNode *node) {
-
+	// TODO
 }
 
 static SSValue vm_make_number_literal(AstNode *node) {
@@ -37,7 +42,7 @@ static SSValue vm_make_number_literal(AstNode *node) {
 static SSValue vm_make_str_literal(AstNode *node) {
 	DBGCHECK(node->type == AST_STRING);
 	SSValue value = {.type = SSVALUE_STR};
-	SSString *str = ss_alloc(node->str.size);
+	SSString *str = SSString_new(node->str.size);
 	str->size = node->str.size;
 	memcpy(str->data, node->str.data, node->str.size);
 	value.value = str;

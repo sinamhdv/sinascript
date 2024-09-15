@@ -9,4 +9,6 @@ typedef struct SSArray {
 	SSValue data[];
 } SSArray;
 
+SSArray *SSArray_new(size_t elem_count);
+
 #endif

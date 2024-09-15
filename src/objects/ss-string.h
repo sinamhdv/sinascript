@@ -9,4 +9,6 @@ typedef struct SSString {
 	char data[];
 } SSString;
 
+SSString *SSString_new(size_t data_size);
+
 #endif
