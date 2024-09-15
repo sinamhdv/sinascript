@@ -4,6 +4,8 @@
 #include "../objects/ss-value.h"
 #include "../objects/ss-string.h"
 #include "../objects/ss-array.h"
+#include "../heap/heap.h"
+#include "../builtins/builtins.h"
 #include <assert.h>
 #include <string.h>
 
@@ -26,11 +28,22 @@ static SSValue vm_get_identifier_value(AstNode *node) {
 static SSArray *vm_eval_expression_list(AstNode *node) {
 	DBGCHECK(node->type == AST_EXPR_LIST);
 	SSArray *arr = SSArray_new(node->subs.size);
-
+	for (size_t i = 0; i < node->subs.size; i++) {
+		arr->data[i] = vm_evaluate_expression(node->subs.arr[i]);
+	}
+	return arr;
 }
 
 static SSValue vm_function_call(AstNode *node) {
-	// TODO
+	DBGCHECK(node->type == AST_FUNCTION_CALL);
+	DBGCHECK(node->subs.size == 2);
+	DBGCHECK(((AstNode *)node->subs.arr[0])->type == AST_IDENTIFIER);
+	DBGCHECK(((AstNode *)node->subs.arr[1])->type == AST_EXPR_LIST);
+	String *func_name = &((AstNode *)node->subs.arr[0])->ident;
+	SSArray *arr = vm_eval_expression_list(node->subs.arr[1]);
+	SSValue return_val = builtin_function_call(func_name, arr);
+	ss_free(arr);
+	return return_val;
 }
 
 static SSValue vm_make_number_literal(AstNode *node) {
@@ -43,7 +56,6 @@ static SSValue vm_make_str_literal(AstNode *node) {
 	DBGCHECK(node->type == AST_STRING);
 	SSValue value = {.type = SSVALUE_STR};
 	SSString *str = SSString_new(node->str.size);
-	str->size = node->str.size;
 	memcpy(str->data, node->str.data, node->str.size);
 	value.value = str;
 	return value;
