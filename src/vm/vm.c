@@ -2,7 +2,56 @@
 #include "../utils/utils.h"
 #include "../utils/errors.h"
 #include "../objects/ss-value.h"
+#include "../objects/ss-string.h"
+#include "../objects/ss-array.h"
+#include "../heap/heap.h"
 #include <assert.h>
+#include <string.h>
+
+static SSValue vm_run_bin_op(AstNode *node) {
+
+}
+
+static SSValue vm_run_unary_op(AstNode *node) {
+
+}
+
+static SSValue vm_read_index(AstNode *node) {
+
+}
+
+static SSValue vm_get_identifier_value(AstNode *node) {
+
+}
+
+static SSValue vm_function_call(AstNode *node) {
+
+}
+
+static SSValue vm_make_number_literal(AstNode *node) {
+	DBGCHECK(node->type == AST_NUMBER);
+	SSValue value = {.type = SSVALUE_NUM, .value = (void*)(node->num)};
+	return value;
+}
+
+static SSValue vm_make_str_literal(AstNode *node) {
+	DBGCHECK(node->type == AST_STRING);
+	SSValue value = {.type = SSVALUE_STR};
+	SSString *str = ss_alloc(node->str.size);
+	str->size = node->str.size;
+	memcpy(str->data, node->str.data, node->str.size);
+	value.value = str;
+	return value;
+}
+
+static SSValue vm_make_arr_literal(AstNode *node) {
+	DBGCHECK(node->type == AST_ARRAY);
+	DBGCHECK(node->subs.size == 1);
+	SSValue value = {.type = SSVALUE_ARR};
+	SSArray *arr = vm_eval_expression_list(node->subs.arr[0]);
+	value.value = arr;
+	return value;
+}
 
 SSValue vm_evaluate_expression(AstNode *node) {
 	switch (node->type) {
@@ -23,7 +72,7 @@ static SSValue *vm_get_lvalue(AstNode *node) {
 }
 
 static void vm_assign_variable(SSValue *var, SSValue value) {
-	// TODO
+	// TODO: maybe move this to variables.c?
 }
 
 static void vm_run_if_statement(AstNode *node) {
