@@ -10,8 +10,61 @@
 #include <assert.h>
 #include <string.h>
 
+static SSNumber _bin_op_only_number(char op[2], SSValue lval, SSValue rval, AstNode *node) {
+	if (lval.type != SSVALUE_NUM || rval.type != SSVALUE_NUM)
+		fatal_runtime_error(node);
+	SSNumber lnum = (SSNumber)lval.value;
+	SSNumber rnum = (SSNumber)rval.value;
+	switch (op[0]) {
+		case '<':
+			return op[1] == '=' ? (lnum <= rnum) : (lnum < rnum);
+		case '>':
+			return op[1] == '=' ? (lnum >= rnum) : (lnum > rnum);
+		case '-':
+			return lnum - rnum;
+		case '*':
+			return lnum * rnum;
+		case '/':
+			return lnum / rnum;
+	}
+}
+
 static SSValue vm_run_bin_op(AstNode *node) {
-	// TODO
+	DBGCHECK(node->type == AST_BIN_OP);
+	DBGCHECK(node->subs.size == 2);
+	AstNode *lnode = node->subs.arr[0];
+	AstNode *rnode = node->subs.arr[1];
+	SSValue lval = vm_evaluate_expression(lnode);
+	SSValue rval = vm_evaluate_expression(rnode);
+	SSValue result;
+	switch (node->op[0]) {
+		case '|':
+			result = (SSValue){.type = SSVALUE_NUM,
+				.value = (void*)(size_t)(SSVALUE_TRUTH_VAL(lval) || SSVALUE_TRUTH_VAL(rval))};
+			break;
+		case '&':
+			result = (SSValue){.type = SSVALUE_NUM,
+				.value = (void*)(size_t)(SSVALUE_TRUTH_VAL(lval) && SSVALUE_TRUTH_VAL(rval))};
+			break;
+		case '<':
+		case '>':
+		case '-':
+		case '*':
+		case '/':
+			result = (SSValue){.type = SSVALUE_NUM,
+				.value = (void*)_bin_op_only_number(node->op, lval, rval, node)};
+			break;
+		case '=':
+			// TODO
+			break;
+		case '+':
+			// TODO
+			break;
+		default: fatal_runtime_error(node);
+	}
+	ss_value_free_if_noref(lval);
+	ss_value_free_if_noref(rval);
+	return result;
 }
 
 static SSValue vm_run_unary_op(AstNode *node) {
