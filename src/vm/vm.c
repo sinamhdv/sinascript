@@ -14,7 +14,23 @@ static SSValue vm_run_bin_op(AstNode *node) {
 }
 
 static SSValue vm_run_unary_op(AstNode *node) {
-	// TODO
+	DBGCHECK(node->type == AST_UNARY_OP);
+	DBGCHECK(node->subs.size == 1);
+	SSValue operand = vm_evaluate_expression(node->subs.arr[0]);
+	switch (node->op[0]) {
+		case '-':
+			if (operand.type != SSVALUE_NUM) {
+				fatal_runtime_error(node);
+			}
+			operand.value = (void*)(-(SSNumber)operand.value);
+			break;
+		case '!':
+			operand.value = (void*)(size_t)(!SSVALUE_TRUTH_VAL(operand));
+			operand.type = SSVALUE_NUM;
+			break;
+		default: fatal_runtime_error(node);
+	}
+	return operand;
 }
 
 static SSValue vm_read_index(AstNode *node) {
@@ -22,7 +38,8 @@ static SSValue vm_read_index(AstNode *node) {
 }
 
 static SSValue vm_get_identifier_value(AstNode *node) {
-	// TODO
+	DBGCHECK(node->type == AST_IDENTIFIER);
+	return vm_read_variable(&(node->ident));
 }
 
 static SSArray *vm_eval_expression_list(AstNode *node) {
