@@ -103,6 +103,8 @@ static SSValue *vm_get_index_reference(AstNode *node) {
 	SSValue *arr_ref = vm_get_var_reference(&(arr_name->ident), 0);
 	if (arr_ref == NULL)
 		fatal_runtime_error(node);
+	if (arr_ref->type != SSVALUE_ARR)
+		fatal_runtime_error(node);
 	SSValue index_val = vm_evaluate_expression(index_expr);
 	if (index_val.type != SSVALUE_NUM)
 		fatal_runtime_error(node);
