@@ -11,6 +11,12 @@ static size_t skip_whitespace(String *source, size_t i) {
 	return i;
 }
 
+static size_t skip_comment_line(String *source, size_t i) {
+	while (i < source->size && source->data[i] != '\n')
+		i++;
+	return i;
+}
+
 static int get_keyword_size_at(String *source, size_t i) {
 	char *keywords[] = {"if", "else", "while", "async"};
 	size_t keywords_size = sizeof(keywords) / sizeof(char *);
@@ -124,6 +130,9 @@ Token *tokenize_source(String *source) {
 			case '"':
 				token = add_token_to_list(&tok_list, get_string_literal_token(source, i));
 				break;
+			case '#':
+				i = skip_comment_line(source, i);
+				break;
 			default: {
 				if (isdigit(c)) {
 					token = add_token_to_list(&tok_list, get_num_literal_token(source, i));
@@ -136,22 +145,24 @@ Token *tokenize_source(String *source) {
 			}
 		}
 
+		if (token != NULL) {
 #ifdef DEBUG
-		switch (token->type) {
-			case TOKEN_OPERATOR: fprintf(stderr, "[OPR] "); break;
-			case TOKEN_STRING: fprintf(stderr, "[STR] "); break;
-			case TOKEN_NUMBER: fprintf(stderr, "[NUM] "); break;
-			case TOKEN_KEYWORD: fprintf(stderr, "[KEY] "); break;
-			case TOKEN_IDENTIFIER: fprintf(stderr, "[IDN] "); break;
-			default: break;
-		}
-		fputc('\'', stderr);
-		fwrite(token->str.data, 1, token->str.size, stderr);
-		fputc('\'', stderr);
-		fputs("  ", stderr);
+			switch (token->type) {
+				case TOKEN_OPERATOR: fprintf(stderr, "[OPR] "); break;
+				case TOKEN_STRING: fprintf(stderr, "[STR] "); break;
+				case TOKEN_NUMBER: fprintf(stderr, "[NUM] "); break;
+				case TOKEN_KEYWORD: fprintf(stderr, "[KEY] "); break;
+				case TOKEN_IDENTIFIER: fprintf(stderr, "[IDN] "); break;
+				default: break;
+			}
+			fputc('\'', stderr);
+			fwrite(token->str.data, 1, token->str.size, stderr);
+			fputc('\'', stderr);
+			fputs("  ", stderr);
 #endif
 
-		i += token->str.size;
+			i += token->str.size;
+		}
 		i = skip_whitespace(source, i);
 	}
 
