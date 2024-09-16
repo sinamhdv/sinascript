@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 
 	String *source = String_new(file_size);
 	if (source == NULL) return 1;
-	if (fread(source->data, 1, file_size, fp) != file_size) return 1;
+	if (fread(source->data, 1, file_size, fp) != (size_t)file_size) return 1;
 	fclose(fp);
 
 	run_source(source);
