@@ -12,9 +12,11 @@ void *ss_alloc(size_t size) {
 void ss_free_if_noref(void *ptr, int recursive) {
 	SSHeapHeader *hhdr = (SSHeapHeader *)ptr;
 	if (hhdr->refcount == 0) {
-		SSArray *arr = (SSArray *)ptr;
-		for (size_t i = 0; i < arr->size; i++) {
-			ss_value_dec_refcount(arr->data[i]);
+		if (recursive) {
+			SSArray *arr = (SSArray *)ptr;
+			for (size_t i = 0; i < arr->size; i++) {
+				ss_value_dec_refcount(arr->data[i]);
+			}
 		}
 		free(ptr);
 	}
