@@ -164,7 +164,7 @@ static AstNode *parse_function_call_expression(Token **start_tok) {
 	AstNode *func = parse_primary_expression(start_tok);
 	if (!TOKEN_IS_OPERATOR(*start_tok, "("))
 		return func;
-	if ((*start_tok)->type != TOKEN_IDENTIFIER)
+	if (func->type != AST_IDENTIFIER)
 		fatal_invalid_syntax(*start_tok);
 	parser_skip_operator(start_tok, "(");
 	AstNode *arg_list = parse_expression_list(start_tok, ")");
