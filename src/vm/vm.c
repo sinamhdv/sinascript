@@ -100,7 +100,9 @@ static SSValue *vm_get_index_reference(AstNode *node) {
 	AstNode *index_expr = node->subs.arr[1];
 	if (arr_name->type != AST_IDENTIFIER)
 		fatal_runtime_error(node);	// not implementing multidimentional array indexing yet
-	SSValue *arr_ref = vm_get_var_reference(&(arr_name->ident));
+	SSValue *arr_ref = vm_get_var_reference(&(arr_name->ident), 0);
+	if (arr_ref == NULL)
+		fatal_runtime_error(node);
 	SSValue index_val = vm_evaluate_expression(index_expr);
 	if (index_val.type != SSVALUE_NUM)
 		fatal_runtime_error(node);
@@ -118,7 +120,10 @@ static SSValue vm_read_index(AstNode *node) {
 
 static SSValue vm_get_identifier_value(AstNode *node) {
 	DBGCHECK(node->type == AST_IDENTIFIER);
-	return *vm_get_var_reference(&(node->ident));
+	SSValue *var_ref = vm_get_var_reference(&(node->ident), 0);
+	if (var_ref == NULL)
+		fatal_runtime_error(node);
+	return *var_ref;
 }
 
 static SSArray *vm_eval_expression_list(AstNode *node) {
@@ -185,7 +190,7 @@ static SSValue *vm_get_lvalue(AstNode *node) {
 	DBGCHECK(node->type == AST_IDENTIFIER || node->type == AST_INDEX);
 	switch (node->type) {
 		case AST_IDENTIFIER:
-			return vm_get_var_reference(&(node->ident));
+			return vm_get_var_reference(&(node->ident), 1);
 			break;
 		case AST_INDEX:
 			return vm_get_index_reference(node);
