@@ -138,7 +138,7 @@ static SSValue vm_function_call(AstNode *node) {
 	DBGCHECK(((AstNode *)node->subs.arr[1])->type == AST_EXPR_LIST);
 	String *func_name = &((AstNode *)node->subs.arr[0])->ident;
 	SSArray *arr = vm_eval_expression_list(node->subs.arr[1]);
-	SSValue return_val = builtin_function_call(func_name, arr);
+	SSValue return_val = builtin_function_call(func_name, arr, node);
 	ss_value_free_if_noref((SSValue){.type = SSVALUE_ARR, .value = arr});
 	return return_val;
 }
