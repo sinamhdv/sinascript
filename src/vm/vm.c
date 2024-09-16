@@ -24,10 +24,13 @@ static SSValue vm_run_unary_op(AstNode *node) {
 			}
 			operand.value = (void*)(-(SSNumber)operand.value);
 			break;
-		case '!':
-			operand.value = (void*)(size_t)(!SSVALUE_TRUTH_VAL(operand));
+		case '!': {
+			void *new_value = (void*)(size_t)(!SSVALUE_TRUTH_VAL(operand));
+			ss_value_free_if_noref(operand);	// heap-managed values become a number with this op
+			operand.value = new_value;
 			operand.type = SSVALUE_NUM;
 			break;
+		}
 		default: fatal_runtime_error(node);
 	}
 	return operand;
@@ -47,6 +50,7 @@ static SSArray *vm_eval_expression_list(AstNode *node) {
 	SSArray *arr = SSArray_new(node->subs.size);
 	for (size_t i = 0; i < node->subs.size; i++) {
 		arr->data[i] = vm_evaluate_expression(node->subs.arr[i]);
+		ss_inc_refcount(arr->data[i].value);
 	}
 	return arr;
 }
@@ -59,7 +63,7 @@ static SSValue vm_function_call(AstNode *node) {
 	String *func_name = &((AstNode *)node->subs.arr[0])->ident;
 	SSArray *arr = vm_eval_expression_list(node->subs.arr[1]);
 	SSValue return_val = builtin_function_call(func_name, arr);
-	ss_free(arr);
+	ss_value_free_if_noref((SSValue){.type = SSVALUE_ARR, .value = arr});
 	return return_val;
 }
 
@@ -113,7 +117,9 @@ static void vm_run_if_statement(AstNode *node) {
 	DBGCHECK(node->type == AST_IF);
 	DBGCHECK(node->subs.size == 2 || node->subs.size == 3);
 	SSValue condition_val = vm_evaluate_expression(node->subs.arr[0]);
-	if (SSVALUE_TRUTH_VAL(condition_val)) {
+	int truth_val = SSVALUE_TRUTH_VAL(condition_val);
+	ss_value_free_if_noref(condition_val);
+	if (truth_val) {
 		vm_run_statement_list(node->subs.arr[1]);
 	} else if (node->subs.size == 3) {
 		vm_run_statement_list(node->subs.arr[2]);
@@ -123,11 +129,15 @@ static void vm_run_if_statement(AstNode *node) {
 static void vm_run_while_statement(AstNode *node) {
 	DBGCHECK(node->type == AST_WHILE);
 	DBGCHECK(node->subs.size == 2);
-	SSValue condition_val;
-	while ((condition_val = vm_evaluate_expression(node->subs.arr[0])), SSVALUE_TRUTH_VAL(condition_val)) {
+	SSValue condition_val = vm_evaluate_expression(node->subs.arr[0]);
+	int truth_val = SSVALUE_TRUTH_VAL(condition_val);
+	ss_value_free_if_noref(condition_val);
+	while (truth_val) {
 		vm_run_statement_list(node->subs.arr[1]);
+		condition_val = vm_evaluate_expression(node->subs.arr[0]);
+		truth_val = SSVALUE_TRUTH_VAL(condition_val);
+		ss_value_free_if_noref(condition_val);
 	}
-	// TODO: probably have to free the condition_val object here? (and also in if/assign/expr statements)
 }
 
 static void vm_run_async_statement(AstNode *node) {
@@ -147,7 +157,8 @@ static void vm_run_assignment_statement(AstNode *node) {
 }
 
 static void vm_run_expression_statement(AstNode *node) {
-	vm_evaluate_expression(node);
+	SSValue value = vm_evaluate_expression(node);
+	ss_value_free_if_noref(value);
 }
 
 static void vm_run_statement(AstNode *node) {
