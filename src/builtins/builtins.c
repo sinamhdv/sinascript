@@ -5,7 +5,7 @@
 static void _show_value(SSValue value) {
 	switch (value.type) {
 		case SSVALUE_NUM:
-			printf("%ld\n", (SSNumber)value.value);
+			printf("%ld", (SSNumber)value.value);
 			break;
 		case SSVALUE_STR: {
 			SSString *str = (SSString *)value.value;

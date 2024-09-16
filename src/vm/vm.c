@@ -131,7 +131,7 @@ static SSArray *vm_eval_expression_list(AstNode *node) {
 	SSArray *arr = SSArray_new(node->subs.size);
 	for (size_t i = 0; i < node->subs.size; i++) {
 		arr->data[i] = vm_evaluate_expression(node->subs.arr[i]);
-		ss_inc_refcount(arr->data[i].value);
+		ss_value_inc_refcount(arr->data[i]);
 	}
 	return arr;
 }
