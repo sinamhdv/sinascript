@@ -10,5 +10,6 @@ void ss_dec_refcount(void *ptr, int recursive);
 void ss_inc_refcount(void *ptr);
 void ss_value_free_if_noref(SSValue value);
 void ss_value_dec_refcount(SSValue value);
+void ss_value_inc_refcount(SSValue value);
 
 #endif

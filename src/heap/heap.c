@@ -40,3 +40,8 @@ void ss_value_dec_refcount(SSValue value) {
 	if ((int)value.type >= 0)
 		ss_dec_refcount(value.value, value.type == SSVALUE_ARR);
 }
+
+void ss_value_inc_refcount(SSValue value) {
+	if ((int)value.type >= 0)
+		ss_inc_refcount(value.value);
+}

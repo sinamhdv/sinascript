@@ -1,4 +1,5 @@
 #include "vm.h"
+#include "variables.h"
 #include "../utils/utils.h"
 #include "../utils/errors.h"
 #include "../objects/ss-value.h"
@@ -36,13 +37,32 @@ static SSValue vm_run_unary_op(AstNode *node) {
 	return operand;
 }
 
+static SSValue *vm_get_index_reference(AstNode *node) {
+	DBGCHECK(node->type == AST_INDEX);
+	DBGCHECK(node->subs.size == 2);
+	AstNode *arr_name = node->subs.arr[0];
+	AstNode *index_expr = node->subs.arr[1];
+	if (arr_name->type != AST_IDENTIFIER)
+		fatal_runtime_error(node);	// not implementing multidimentional array indexing yet
+	SSValue *arr_ref = vm_get_var_reference(&(arr_name->ident));
+	SSValue index_val = vm_evaluate_expression(index_expr);
+	if (index_val.type != SSVALUE_NUM)
+		fatal_runtime_error(node);
+	SSArray *arr = ((SSArray *)arr_ref->value);
+	size_t access_idx = (size_t)index_val.value;
+	if (access_idx >= arr->size)
+		fatal_runtime_error(node);	// OOB array access
+	return &arr->data[access_idx];
+}
+
 static SSValue vm_read_index(AstNode *node) {
-	// TODO
+	DBGCHECK(node->type == AST_INDEX);
+	return *vm_get_index_reference(node);
 }
 
 static SSValue vm_get_identifier_value(AstNode *node) {
 	DBGCHECK(node->type == AST_IDENTIFIER);
-	return vm_read_variable(&(node->ident));
+	return *vm_get_var_reference(&(node->ident));
 }
 
 static SSArray *vm_eval_expression_list(AstNode *node) {
@@ -106,11 +126,17 @@ SSValue vm_evaluate_expression(AstNode *node) {
 }
 
 static SSValue *vm_get_lvalue(AstNode *node) {
-	// TODO
-}
-
-static void vm_assign_variable(SSValue *var, SSValue value) {
-	// TODO: maybe move this to variables.c?
+	DBGCHECK(node->type == AST_IDENTIFIER || node->type == AST_INDEX);
+	switch (node->type) {
+		case AST_IDENTIFIER:
+			return vm_get_var_reference(&(node->ident));
+			break;
+		case AST_INDEX:
+			return vm_get_index_reference(node);
+			break;
+		default:
+			fatal_runtime_error(node);
+	}
 }
 
 static void vm_run_if_statement(AstNode *node) {
@@ -147,13 +173,19 @@ static void vm_run_async_statement(AstNode *node) {
 	vm_run_statement_list(node->subs.arr[0]);
 }
 
+static void vm_write_variable(SSValue *var, SSValue new_value) {
+	ss_value_dec_refcount(*var);
+	*var = new_value;
+	ss_value_inc_refcount(*var);
+}
+
 static void vm_run_assignment_statement(AstNode *node) {
 	DBGCHECK(node->type == AST_ASSIGNMENT);
 	DBGCHECK(node->subs.size == 2);
 	DBGCHECK(ASTNODETYPE_IS_ASSIGNMENT_LVALUE(((AstNode *)node->subs.arr[0])->type));
 	SSValue *lvalue = vm_get_lvalue(node->subs.arr[0]);
 	SSValue rvalue = vm_evaluate_expression(node->subs.arr[1]);
-	vm_assign_variable(lvalue, rvalue);
+	vm_write_variable(lvalue, rvalue);
 }
 
 static void vm_run_expression_statement(AstNode *node) {
