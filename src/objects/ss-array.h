@@ -10,5 +10,7 @@ typedef struct SSArray {
 } SSArray;
 
 SSArray *SSArray_new(size_t elem_count);
+SSArray *SSArray_concat(SSArray *a, SSArray *b);
+int SSArray_cmp(SSArray *a, SSArray *b);
 
 #endif

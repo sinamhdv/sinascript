@@ -10,5 +10,7 @@ typedef struct SSString {
 } SSString;
 
 SSString *SSString_new(size_t data_size);
+SSString *SSString_concat(SSString *a, SSString *b);
+int SSString_cmp(SSString *a, SSString *b);
 
 #endif

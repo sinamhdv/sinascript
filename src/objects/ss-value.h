@@ -1,4 +1,5 @@
 #include "ss-number.h"
+#include "../parser/ast.h"
 #include <stdlib.h>
 
 #ifndef MYHEADER_SS_VALUE_H
@@ -20,5 +21,8 @@ typedef struct SSHeapHeader {
 } SSHeapHeader;
 
 #define SSVALUE_TRUTH_VAL(v) (((v).type != SSVALUE_NUM || (SSNumber)(v).value != 0) ? 1 : 0)
+
+int SSValue_cmp(SSValue a, SSValue b);
+SSValue SSValue_add(SSValue lval, SSValue rval, AstNode *error_location_node);
 
 #endif

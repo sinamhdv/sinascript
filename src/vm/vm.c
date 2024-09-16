@@ -27,6 +27,7 @@ static SSNumber _bin_op_only_number(char op[2], SSValue lval, SSValue rval, AstN
 		case '/':
 			return lnum / rnum;
 	}
+	fatal_runtime_error(node);
 }
 
 static SSValue vm_run_bin_op(AstNode *node) {
@@ -55,10 +56,12 @@ static SSValue vm_run_bin_op(AstNode *node) {
 				.value = (void*)_bin_op_only_number(node->op, lval, rval, node)};
 			break;
 		case '=':
-			// TODO
+			DBGCHECK(node->op[1] == '=');
+			result.type = SSVALUE_NUM;
+			result.value = (void *)(size_t)(SSValue_cmp(lval, rval) == 0);
 			break;
 		case '+':
-			// TODO
+			result = SSValue_add(lval, rval, node);
 			break;
 		default: fatal_runtime_error(node);
 	}
