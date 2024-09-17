@@ -273,6 +273,16 @@ void vm_run_statement_list(AstNode *node) {
 	}
 }
 
+static void vm_init(void) {
+	vm_variables_init();
+}
+
+static void vm_destroy(void) {
+	vm_variables_destroy();
+}
+
 void vm_main(AstNode *ast) {
+	vm_init();
 	vm_run_statement_list(ast);
+	vm_destroy();
 }
