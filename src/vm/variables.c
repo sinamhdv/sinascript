@@ -56,18 +56,18 @@ static MapEntry *HashMap_find(HashMap *map, String *key, int create_if_not_found
 	return entry;
 }
 
-static void HashMap_insert(HashMap *map, MapEntry *entry) {
+void HashMap_insert(HashMap *map, MapEntry *entry) {
 	MapEntry *new_entry = HashMap_find(map, entry->key, 1);
 	new_entry->value = entry->value;
 }
 
-static void HashMap_init(HashMap *map, size_t bucket_count) {
+void HashMap_init(HashMap *map, size_t bucket_count) {
 	map->bucket_count = bucket_count;
 	map->buckets = checked_malloc(map->bucket_count * sizeof(Bucket));
 	memset(map->buckets, 0, map->bucket_count * sizeof(Bucket));
 }
 
-static void HashMap_free(HashMap *map) {
+void HashMap_free(HashMap *map) {
 	free(map->buckets);
 	map->buckets = NULL;
 	map->bucket_count = 0;

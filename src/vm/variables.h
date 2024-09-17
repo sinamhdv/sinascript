@@ -23,9 +23,9 @@ typedef struct HashMap {
 	Bucket *buckets;
 } HashMap;
 
-static void HashMap_insert(HashMap *map, MapEntry *entry);
-static void HashMap_init(HashMap *map, size_t bucket_count);
-static void HashMap_free(HashMap *map);
+void HashMap_insert(HashMap *map, MapEntry *entry);
+void HashMap_init(HashMap *map, size_t bucket_count);
+void HashMap_free(HashMap *map);
 
 void vm_variables_init(void);
 void vm_variables_destroy(void);
