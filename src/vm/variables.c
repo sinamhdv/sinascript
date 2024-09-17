@@ -53,6 +53,8 @@ static MapEntry *HashMap_find(HashMap *map, String *key, int create_if_not_found
 	MapEntry *entry = &bucket->entries[i];
 	entry->key = String_new(key->size);
 	memcpy(entry->key->data, key->data, key->size);
+	entry->value.type = SSVALUE_NUM;	// a newly created entry is set to the number 0
+	entry->value.value = 0;
 	return entry;
 }
 

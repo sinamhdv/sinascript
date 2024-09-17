@@ -7,6 +7,11 @@ while (i < 2) {
 	arr[0] = a * 2;
 	i = i + 1;
 }
-show(a, b, i);
-show(arr);
-show("hello" + " " + "world!");
+show(a, b, i, "\n");
+show(arr, "\n");
+show("hello" + " " + "world!\n");
+
+# expected output:
+# -9 15 2
+# [-18, 2, 10]
+# hello world!
