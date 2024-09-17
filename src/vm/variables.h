@@ -7,7 +7,7 @@
 #define INITIAL_HASHMAP_SIZE 1033
 #define BUCKET_SIZE 8
 
-typedef uint64_t hash_t;
+typedef int hash_t;
 
 typedef struct MapEntry {
 	String *key;
@@ -22,6 +22,10 @@ typedef struct HashMap {
 	size_t bucket_count;
 	Bucket *buckets;
 } HashMap;
+
+static void HashMap_insert(HashMap *map, MapEntry *entry);
+static void HashMap_init(HashMap *map, size_t bucket_count);
+static void HashMap_free(HashMap *map);
 
 void vm_variables_init(void);
 void vm_variables_destroy(void);

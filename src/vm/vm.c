@@ -278,6 +278,7 @@ static void vm_init(void) {
 }
 
 static void vm_destroy(void) {
+	// TODO: join for the potential thread created with async
 	vm_variables_destroy();
 }
 
