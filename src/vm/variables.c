@@ -81,7 +81,7 @@ static void HashMap_destroy(HashMap *map) {
 		Bucket *bucket = &map->buckets[i];
 		for (size_t j = 0; j < BUCKET_SIZE && bucket->entries[j].key != NULL; j++) {
 			free(bucket->entries[j].key);
-			ss_value_immediately_free(bucket->entries[j].value);
+			ss_value_dec_refcount(bucket->entries[j].value);
 		}
 	}
 	free(map->buckets);

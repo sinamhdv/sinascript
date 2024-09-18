@@ -48,17 +48,17 @@ void ss_value_inc_refcount(SSValue value) {
 		ss_inc_refcount(value.value);
 }
 
-void ss_immediately_free(void *ptr, int recursive) {
-	if (recursive) {
-		SSArray *arr = (SSArray *)ptr;
-		for (size_t i = 0; i < arr->size; i++) {
-			ss_value_immediately_free(arr->data[i]);
-		}
-	}
-	free(ptr);
-}
+// void ss_immediately_free(void *ptr, int recursive) {
+// 	if (recursive) {
+// 		SSArray *arr = (SSArray *)ptr;
+// 		for (size_t i = 0; i < arr->size; i++) {
+// 			ss_value_immediately_free(arr->data[i]);
+// 		}
+// 	}
+// 	free(ptr);
+// }
 
-void ss_value_immediately_free(SSValue value) {
-	if ((int)value.type >= 0)
-		ss_immediately_free(value.value, value.type == SSVALUE_ARR);
-}
+// void ss_value_immediately_free(SSValue value) {
+// 	if ((int)value.type >= 0)
+// 		ss_immediately_free(value.value, value.type == SSVALUE_ARR);
+// }

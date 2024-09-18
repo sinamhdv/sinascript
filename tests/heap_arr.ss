@@ -6,8 +6,12 @@ while (i < 2) {
 	} else {
 		a = [b];
 	}
-	i++;
+	i = i + 1;
 }
+show(a, "\n");
+show(b, "\n");
 
-a = 5
-b = 5
+#free the objects
+a = 5;
+b = 5;
+
