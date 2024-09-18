@@ -38,7 +38,7 @@ static MapEntry *HashMap_find(HashMap *map, String *key, int create_if_not_found
 	Bucket *bucket;
 	do {
 		hash_t bucket_idx = HashMap_hash_key(map, key);
-		bucket = &root_vars.buckets[bucket_idx];
+		bucket = &map->buckets[bucket_idx];
 		for (i = 0; i < BUCKET_SIZE && bucket->entries[i].key != NULL; i++) {
 			if (String_cmpstr(key, bucket->entries[i].key) == 0) {
 				return &bucket->entries[i];
