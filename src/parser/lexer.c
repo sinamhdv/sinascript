@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static size_t skip_whitespace(String *source, size_t i) {
 	while (i < source->size && isspace(source->data[i]))
@@ -147,18 +148,20 @@ Token *tokenize_source(String *source) {
 
 		if (token != NULL) {
 #ifdef DEBUG
-			switch (token->type) {
-				case TOKEN_OPERATOR: fprintf(stderr, "[OPR] "); break;
-				case TOKEN_STRING: fprintf(stderr, "[STR] "); break;
-				case TOKEN_NUMBER: fprintf(stderr, "[NUM] "); break;
-				case TOKEN_KEYWORD: fprintf(stderr, "[KEY] "); break;
-				case TOKEN_IDENTIFIER: fprintf(stderr, "[IDN] "); break;
-				default: break;
+			if (getenv("DEBUG_LEXER") != NULL) {
+				switch (token->type) {
+					case TOKEN_OPERATOR: fprintf(stderr, "[OPR] "); break;
+					case TOKEN_STRING: fprintf(stderr, "[STR] "); break;
+					case TOKEN_NUMBER: fprintf(stderr, "[NUM] "); break;
+					case TOKEN_KEYWORD: fprintf(stderr, "[KEY] "); break;
+					case TOKEN_IDENTIFIER: fprintf(stderr, "[IDN] "); break;
+					default: break;
+				}
+				fputc('\'', stderr);
+				fwrite(token->str.data, 1, token->str.size, stderr);
+				fputc('\'', stderr);
+				fputs("  ", stderr);
 			}
-			fputc('\'', stderr);
-			fwrite(token->str.data, 1, token->str.size, stderr);
-			fputc('\'', stderr);
-			fputs("  ", stderr);
 #endif
 
 			i += token->str.size;
@@ -169,10 +172,6 @@ Token *tokenize_source(String *source) {
 	Token *eof_token = Token_new(0);
 	eof_token->type = TOKEN_EOF;
 	add_token_to_list(&tok_list, eof_token);
-
-#ifdef DEBUG
-	fprintf(stderr, "EOF\n\n");
-#endif
 
 	return tok_list;
 }

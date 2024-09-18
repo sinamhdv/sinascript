@@ -358,7 +358,9 @@ void run_source(String *source) {
 	Token *tokens = tokenize_source(source);
 	AstNode *ast = parse_statement_list(&tokens, 0);
 #ifdef DEBUG
-	debug_ast(ast, 0);
+	if (getenv("DEBUG_AST") != NULL) {
+		debug_ast(ast, 0);
+	}
 #endif
 	// TODO: free tokens (or not? useful for showing precise error locations to the user?)
 	// TODO: generate bytecode?
