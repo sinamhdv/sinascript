@@ -9,6 +9,10 @@
 #include "../builtins/builtins.h"
 #include <assert.h>
 #include <string.h>
+#include <pthread.h>
+
+pthread_t async_thread;
+int async_running;
 
 static SSNumber _bin_op_only_number(char op[2], SSValue lval, SSValue rval, AstNode *node) {
 	if (lval.type != SSVALUE_NUM || rval.type != SSVALUE_NUM)
@@ -230,10 +234,16 @@ static void vm_run_while_statement(AstNode *node) {
 }
 
 static void vm_run_async_statement(AstNode *node) {
-	// TODO: implement this with concurrency
 	DBGCHECK(node->type == AST_ASYNC);
 	DBGCHECK(node->subs.size == 1);
-	vm_run_statement_list(node->subs.arr[0]);
+	if (async_running) {
+		if (pthread_join(async_thread, NULL) != 0)
+			fatal_runtime_error(node);
+	}
+	async_running = 1;
+	if (pthread_create(&async_thread, NULL,
+		(void *(*)(void *))vm_run_statement_list, node->subs.arr[0]) != 0)
+		fatal_runtime_error(node);
 }
 
 static void vm_write_variable(SSValue *var, SSValue new_value) {
@@ -278,7 +288,10 @@ static void vm_init(void) {
 }
 
 static void vm_destroy(void) {
-	// TODO: join for the potential thread created with async
+	if (async_running) {
+		if (pthread_join(async_thread, NULL) != 0)
+			fatal_runtime_error(NULL);
+	}
 	vm_variables_destroy();
 }
 
