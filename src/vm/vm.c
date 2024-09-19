@@ -11,6 +11,7 @@
 #include <string.h>
 #include <pthread.h>
 
+pthread_mutex_t async_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t async_thread;
 int async_running;
 
