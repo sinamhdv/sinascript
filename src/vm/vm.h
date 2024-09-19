@@ -1,5 +1,8 @@
 #include "../parser/ast.h"
 #include "../objects/ss-value.h"
+#include <pthread.h>
+
+extern pthread_mutex_t async_mutex;
 
 #ifndef MYHEADER_VM_H
 #define MYHEADER_VM_H

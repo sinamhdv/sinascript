@@ -6,7 +6,7 @@ SRCDIR=src
 
 SRCS := $(shell find $(SRCDIR) -type f -name '*.c')
 OBJS := $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRCS))
-TARGET_BIN = lang
+TARGET_BIN = sinascript
 
 PACKAGES = utils parser types vm objects heap builtins
 $(shell mkdir -p $(addprefix $(OBJDIR)/,$(PACKAGES)))
@@ -15,6 +15,7 @@ all: $(TARGET_BIN)
 
 $(TARGET_BIN): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $@
+	patchelf --set-interpreter ./ld-linux-x86-64.so.2 --set-rpath . $(TARGET_BIN)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -I$(dir $<) -c $< -o $@

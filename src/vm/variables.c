@@ -1,6 +1,7 @@
 #include "variables.h"
 #include "../utils/utils.h"
 #include "../heap/heap.h"
+#include "vm.h"
 #include <string.h>
 
 HashMap root_vars;
@@ -92,7 +93,9 @@ static void HashMap_destroy(HashMap *map) {
 
 
 SSValue *vm_get_var_reference(String *identifier, int create_if_not_found) {
+	pthread_mutex_lock(&async_mutex);
 	MapEntry *entry = HashMap_find(&root_vars, identifier, create_if_not_found);
+	pthread_mutex_unlock(&async_mutex);
 	if (entry == NULL) return NULL;
 	return &(entry->value);
 }

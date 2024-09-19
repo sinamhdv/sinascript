@@ -11,7 +11,7 @@
 #include <string.h>
 #include <pthread.h>
 
-pthread_mutex_t async_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t async_mutex;
 pthread_t async_thread;
 int async_running;
 
@@ -248,9 +248,11 @@ static void vm_run_async_statement(AstNode *node) {
 }
 
 static void vm_write_variable(SSValue *var, SSValue new_value) {
+	pthread_mutex_lock(&async_mutex);
 	ss_value_dec_refcount(*var);
 	*var = new_value;
 	ss_value_inc_refcount(*var);
+	pthread_mutex_unlock(&async_mutex);
 }
 
 static void vm_run_assignment_statement(AstNode *node) {
@@ -285,6 +287,10 @@ void vm_run_statement_list(AstNode *node) {
 }
 
 static void vm_init(void) {
+	pthread_mutexattr_t mutexattr;
+	pthread_mutexattr_init(&mutexattr);
+	pthread_mutexattr_settype(&mutexattr, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&async_mutex, &mutexattr);
 	vm_variables_init();
 }
 
