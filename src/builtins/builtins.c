@@ -36,6 +36,12 @@ static void builtin_show(SSArray *args) {
 	}
 }
 
+static void builtin_alert(SSArray *args) {
+	if (args->size != 1) fatal_runtime_error(NULL);
+	_show_value(args->data[0]);
+	getchar();
+}
+
 #ifdef DEBUG
 static void builtin_debugprint(SSArray *args) {
 	if (args->size < 1) return;
@@ -48,6 +54,8 @@ SSValue builtin_function_call(String *func_name, SSArray *args, AstNode *error_l
 	SSValue result = {.type = SSVALUE_NUM, .value = 0};
 	if (String_cmparr(func_name, "show") == 0) {
 		builtin_show(args);
+	} else if (String_cmparr(func_name, "alert") == 0) {
+		builtin_alert(args);
 	}
 #ifdef DEBUG
 	else if (String_cmparr(func_name, "debugprint") == 0) {
