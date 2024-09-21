@@ -269,11 +269,14 @@ static AstNode *parse_async_statement(Token **start_tok) {
 static AstNode *parse_statement(Token **start_tok) {
 	Token *token = *start_tok;
 	if (token->type == TOKEN_KEYWORD) {
-		if (String_cmparr(&token->str, "if") == 0) {
+		// if (String_cmparr(&token->str, "if") == 0) {
+		if (token->str.data[0] == 'i') {
 			return parse_if_statement(start_tok);
-		} else if (String_cmparr(&token->str, "while") == 0) {
+		// } else if (String_cmparr(&token->str, "while") == 0) {
+		} else if (token->str.data[0] == 'w') {
 			return parse_while_statement(start_tok);
-		} else if (String_cmparr(&token->str, "async") == 0) {
+		// } else if (String_cmparr(&token->str, "async") == 0) {
+		} else if (token->str.data[0] == 'a') {
 			return parse_async_statement(start_tok);
 		} else {
 			fatal_invalid_syntax(*start_tok);

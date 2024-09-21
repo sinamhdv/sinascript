@@ -18,22 +18,45 @@ static size_t skip_comment_line(String *source, size_t i) {
 	return i;
 }
 
+// static int get_keyword_size_at(String *source, size_t i) {
+// 	char *keywords[] = {"if", "else", "while", "async"};
+// 	size_t keywords_size = sizeof(keywords) / sizeof(char *);
+// 	for (size_t k = 0; k < keywords_size; k++) {
+// 		size_t size = strlen(keywords[k]);
+// 		if (i + size <= source->size) {
+// 			if (memcmp(source->data + i, keywords[k], size) == 0) {
+// 				if (i + size >= source->size) return size;
+// 				char after_keyword = source->data[i + size];
+// 				if (isalnum(after_keyword))
+// 					return 0;
+// 				return size;
+// 			}
+// 		}
+// 	}
+// 	return 0;
+// }
+
 static int get_keyword_size_at(String *source, size_t i) {
-	char *keywords[] = {"if", "else", "while", "async"};
-	size_t keywords_size = sizeof(keywords) / sizeof(char *);
-	for (size_t k = 0; k < keywords_size; k++) {
-		size_t size = strlen(keywords[k]);
-		if (i + size <= source->size) {
-			if (memcmp(source->data + i, keywords[k], size) == 0) {
-				if (i + size >= source->size) return size;
-				char after_keyword = source->data[i + size];
-				if (isalnum(after_keyword))
-					return 0;
-				return size;
-			}
-		}
-	}
-	return 0;
+	size_t possible_size = 0;
+	if (i + 2 <= source->size && source->data[i] == 'i' && source->data[i + 1] == 'f')
+		possible_size = 2;
+	else if (i + 4 <= source->size && source->data[i] == 'e' && source->data[i + 1] == 'l'
+		&& source->data[i + 2] == 's' && source->data[i + 3] == 'e')
+		possible_size = 4;
+	else if (i + 5 <= source->size && source->data[i] == 'w' && source->data[i + 1] == 'h'
+		&& source->data[i + 2] == 'i' && source->data[i + 3] == 'l' && source->data[i + 4] == 'e')
+		possible_size = 5;
+	else if (i + 5 <= source->size && source->data[i] == 'a' && source->data[i + 1] == 's'
+		&& source->data[i + 2] == 'y' && source->data[i + 3] == 'n' && source->data[i + 4] == 'c')
+		possible_size = 5;
+	else
+		return 0;
+
+	if (i + possible_size >= source->size) return possible_size;
+	char after_keyword = source->data[i + possible_size];
+	if (isalnum(after_keyword))
+		return 0;
+	return possible_size;
 }
 
 static Token *get_operator_token(String *source, size_t i) {
