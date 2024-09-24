@@ -42,6 +42,19 @@ static void builtin_alert(SSArray *args) {
 	getchar();
 }
 
+static SSValue builtin_length(SSArray *args) {
+	if (args->size != 1) fatal_runtime_error(NULL);
+	SSValue arg = args->data[0];
+	switch (arg.type) {
+		case SSVALUE_ARR:
+			return (SSValue){.type = SSVALUE_NUM, .value = (void*)((SSArray *)arg.value)->size};
+		case SSVALUE_STR:
+			return (SSValue){.type = SSVALUE_NUM, .value = (void*)((SSString *)arg.value)->size};
+		default:
+			fatal_runtime_error(NULL);
+	}
+}
+
 #ifdef DEBUG
 static void builtin_debugprint(SSArray *args) {
 	if (args->size != 1) fatal_runtime_error(NULL);
@@ -56,6 +69,8 @@ SSValue builtin_function_call(String *func_name, SSArray *args, AstNode *error_l
 		builtin_show(args);
 	} else if (String_cmparr(func_name, "alert") == 0) {
 		builtin_alert(args);
+	} else if (String_cmparr(func_name, "length") == 0) {
+		return builtin_length(args);
 	}
 #ifdef DEBUG
 	else if (String_cmparr(func_name, "debugprint") == 0) {
