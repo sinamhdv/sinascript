@@ -6,7 +6,7 @@ SRCDIR=src
 
 SRCS := $(shell find $(SRCDIR) -type f -name '*.c')
 OBJS := $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRCS))
-TARGET_BIN = lang
+TARGET_BIN = sinascript
 
 PACKAGES = utils parser types vm objects heap builtins
 $(shell mkdir -p $(addprefix $(OBJDIR)/,$(PACKAGES)))
