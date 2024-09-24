@@ -14,7 +14,10 @@ try:
 	with tempfile.NamedTemporaryFile() as f:
 		f.write(decoded)
 		f.flush()
-		subprocess.check_call(["./sinascript", f.name])
+		try:
+			subprocess.check_call(["./sinascript", f.name])
+		except:
+			pass
 
 except:
 	print("Error!")
