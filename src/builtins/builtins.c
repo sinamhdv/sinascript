@@ -36,11 +36,33 @@ static void builtin_show(SSArray *args) {
 	}
 }
 
+static void builtin_alert(SSArray *args) {
+	if (args->size != 1) fatal_runtime_error(NULL);
+	_show_value(args->data[0]);
+	getchar();
+}
+
+#ifdef DEBUG
+static void builtin_debugprint(SSArray *args) {
+	if (args->size != 1) fatal_runtime_error(NULL);
+	SSValue val = args->data[0];
+	printf("type: %d, value: %p\n", val.type, val.value);
+}
+#endif
+
 SSValue builtin_function_call(String *func_name, SSArray *args, AstNode *error_location_node) {
 	SSValue result = {.type = SSVALUE_NUM, .value = 0};
 	if (String_cmparr(func_name, "show") == 0) {
 		builtin_show(args);
-	} else {
+	} else if (String_cmparr(func_name, "alert") == 0) {
+		builtin_alert(args);
+	}
+#ifdef DEBUG
+	else if (String_cmparr(func_name, "debugprint") == 0) {
+		builtin_debugprint(args);
+	}
+#endif
+	else {
 		fatal_runtime_error(error_location_node);
 	}
 	return result;
