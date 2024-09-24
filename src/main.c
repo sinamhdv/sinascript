@@ -3,14 +3,7 @@
 #include "types/string-view.h"
 #include "parser/parser.h"
 
-void disable_io_buffering(void) {
-	setbuf(stdout, NULL);
-	setbuf(stderr, NULL);
-	setbuf(stdin, NULL);
-}
-
 int main(int argc, char **argv) {
-	disable_io_buffering();
 	if (argc < 2) {
 		fprintf(stderr, "Usage: %s <file>\n", argv[0]);
 		return 1;
