@@ -43,4 +43,4 @@ SinaScript currently has these features:
 
 ## CTF Challenge
 
-I originally developed SinaScript as a CTF challenge for ASIS CTF Quals 2024 (see the writeup for the challenge `link TBD`).
+I originally developed SinaScript as a CTF challenge for ASIS CTF Quals 2024 (see the writeup for the challenge [here](https://github.com/sinamhdv/ctf-writeups/tree/master/authored-challenges/ASIS/2024_Quals/sinascript)).
